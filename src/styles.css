@@ -838,3 +838,6 @@ a {
     font-size: 1.4rem;
   }
 }
+.chat-view .chat {
+  min-height: 0;
+}

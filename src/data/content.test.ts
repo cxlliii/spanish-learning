@@ -34,7 +34,8 @@ describe("lessons", () => {
   }
 
   it("use no vosotros forms in Spanish text", () => {
-    const spanish = LESSONS.flatMap((l) => [...l.examples.map((e) => e.es), ...l.exercises.flatMap((e) => [e.answer, ...(e.options ?? [])])]);
+    // The Chilean voseo lesson legitimately uses forms like "vivís" and contrasts them with "tenéis".
+    const spanish = LESSONS.filter((l) => l.topicId !== "voseo-chileno").flatMap((l) => [...l.examples.map((e) => e.es), ...l.exercises.flatMap((e) => [e.answer, ...(e.options ?? [])])]);
     const vosotros = /\b(vosotros|vosotras|vuestr[oa]s?|habláis|coméis|vivís|sois|estáis|tenéis|vais|hacéis|podéis|queréis)\b/i;
     expect(spanish.filter((t) => vosotros.test(t))).toEqual([]);
   });
