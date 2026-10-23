@@ -74,7 +74,7 @@ export default function Progress({ state, update, go, today }: ViewProps) {
 
       {state.recentMistakes.length > 0 && (
         <div className="card">
-          <h3>Typische Fehler (werden gezielt wiederholt)</h3>
+          <h3>Typische Fehler aus Gesprächen</h3>
           <ul className="mistakes">
             {state.recentMistakes.slice(0, 8).map((m, i) => (
               <li key={i}>
@@ -89,8 +89,7 @@ export default function Progress({ state, update, go, today }: ViewProps) {
         <h3>Niveau</h3>
         {state.placement && (
           <p className="muted">
-            Einstufung am {state.placement.date}: Grammatik {state.placement.mcLevel}
-            {state.placement.aiLevel && `, Gespräch ${state.placement.aiLevel}`} → {state.placement.finalLevel}
+            Einstufungstest am {state.placement.date}: {state.placement.level}
           </p>
         )}
         <div className="chips">

@@ -1,201 +1,122 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ViewProps } from "../App";
-import { topicById } from "../data/curriculum";
-import { dailyScenario, SCENARIOS, scenariosForLevel, type Scenario } from "../data/scenarios";
-import { askJSON, streamChat, type ChatTurn } from "../lib/claude";
-import { addMistakes, addVocab, markDay } from "../lib/progress";
-import { canSpeak, speak } from "../lib/speech";
-import { ConversationFeedback, conversationSystem, feedbackPrompt, HELP_INSTRUCTION, splitCorrection, type ConversationFeedbackT } from "../lib/tutor";
+import { dialogueFor } from "../data/dialogues";
+import { dailyScenario, GOAL_LABELS, SCENARIOS, scenariosForLevel, type Scenario } from "../data/scenarios";
+import type { Dialogue, DialogueOption } from "../data/types";
+import { shuffle } from "../lib/placement";
+import { addMistakes, addVocab, markDay, type Mistake } from "../lib/progress";
+import { canSpeak, similarity, speak } from "../lib/speech";
 import ChatInput from "./ChatInput";
-import NeedsKey from "./NeedsKey";
 
-interface Line {
-  role: "user" | "assistant";
-  text: string;
-  correction?: string | null;
-  help?: boolean;
-}
-
-const MIN_TURNS_FOR_FEEDBACK = 3;
+const POINTS: Record<DialogueOption["quality"], number> = { best: 1, ok: 0.6, wrong: 0 };
+const POINTS_AFTER_RETRY = 0.3;
 
 export default function Conversation(props: ViewProps) {
   const { state, today, param } = props;
   const [scenario, setScenario] = useState<Scenario | null>(() => SCENARIOS.find((s) => s.id === param) ?? null);
-  if (!state.apiKey) return <NeedsKey {...props} what="Konversationstraining" />;
   if (!state.level) return null;
-  if (!scenario) {
-    const daily = dailyScenario(state.level, today);
-    return (
-      <section>
-        <h1>Konversation üben</h1>
-        <p className="muted">Wähle eine Alltagssituation. Dein Gesprächspartner passt sich deinem Niveau ({state.level}) an und korrigiert dich nebenbei.</p>
-        <div className="scenario-grid">
-          {[daily, ...scenariosForLevel(state.level).filter((s) => s.id !== daily.id).reverse()].map((s) => (
-            <button key={s.id} className={`scenario ${s.id === daily.id ? "daily" : ""}`} onClick={() => setScenario(s)}>
-              <span className="emoji">{s.emoji}</span>
-              <span>{s.title}</span>
-              {s.id === daily.id && <small>Thema des Tages</small>}
-            </button>
-          ))}
-        </div>
-      </section>
-    );
-  }
-  return <ChatSession {...props} scenario={scenario} onBack={() => setScenario(null)} />;
+  const dialogue = scenario ? dialogueFor(scenario.id) : undefined;
+  if (scenario && dialogue) return <DialogueSession {...props} scenario={scenario} dialogue={dialogue} onBack={() => setScenario(null)} />;
+
+  const daily = dailyScenario(state.level, today);
+  const done = new Set(state.conversations.map((c) => c.scenarioId));
+  const list = [daily, ...scenariosForLevel(state.level).filter((s) => s.id !== daily.id).reverse()].filter((s) => dialogueFor(s.id));
+  return (
+    <section>
+      <h1>Gespräche üben</h1>
+      <p className="muted">Alltagssituationen in Chile. Antworte zuerst frei (tippen oder sprechen 🎤) und wähle dann die passende Antwort.</p>
+      <div className="scenario-grid">
+        {list.map((s) => (
+          <button key={s.id} className={`scenario ${s.id === daily.id ? "daily" : ""}`} onClick={() => setScenario(s)}>
+            <span className="emoji">{s.emoji}</span>
+            <span>{s.title}</span>
+            <small className="muted">
+              {s.minLevel} · {GOAL_LABELS[s.goal]}
+              {done.has(s.id) && " · ✓"}
+            </small>
+            {s.id === daily.id && <small className="daily-label">Thema des Tages</small>}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
 }
 
-function ChatSession({ state, update, go, today, scenario, onBack }: ViewProps & { scenario: Scenario; onBack: () => void }) {
-  const level = state.level!;
-  const cfg = { apiKey: state.apiKey, model: state.model };
-  const system = useRef(conversationSystem(level, scenario, state.recentMistakes)).current;
-  const historyRef = useRef<ChatTurn[]>([]);
+interface Line {
+  who: "npc" | "me";
+  es: string;
+  de?: string;
+  /** For learner lines: what they typed/spoke themselves. */
+  free?: boolean;
+}
+
+function DialogueSession({ update, go, today, scenario, dialogue, onBack }: ViewProps & { scenario: Scenario; dialogue: Dialogue; onBack: () => void }) {
+  const [step, setStep] = useState(0);
   const [lines, setLines] = useState<Line[]>([]);
-  const [streaming, setStreaming] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [autoSpeak, setAutoSpeak] = useState(false);
-  const [feedback, setFeedback] = useState<ConversationFeedbackT | null>(null);
-  const [evaluating, setEvaluating] = useState(false);
-  const retryRef = useRef<() => void>(() => {});
+  const [freeFirst, setFreeFirst] = useState(true);
+  const [freeAnswer, setFreeAnswer] = useState<string | null>(null);
+  const [tried, setTried] = useState<DialogueOption[]>([]);
+  const [chosen, setChosen] = useState<DialogueOption | null>(null);
+  const [points, setPoints] = useState<number[]>([]);
+  const [mistakes, setMistakes] = useState<Mistake[]>([]);
+  const [showDe, setShowDe] = useState<Record<number, boolean>>({});
+  const [autoSpeak, setAutoSpeak] = useState(canSpeak());
+  const [finished, setFinished] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
-  const started = useRef(false);
 
+  const current = dialogue.steps[step];
+  const options = useMemo(() => shuffle(current?.options ?? []), [current]);
+  const best = current?.options.find((o) => o.quality === "best");
+
+  // Partner speaks the next line (guarded against StrictMode's double effect run).
+  const shownStep = useRef(-1);
   useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    turn({ role: "user", content: "(Empieza la conversación.)" }, null);
+    if (!current || shownStep.current === step) return;
+    shownStep.current = step;
+    setLines((l) => [...l, { who: "npc", es: current.npc, de: current.npcDe }]);
+    if (autoSpeak) speak(current.npc);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [step]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [lines, streaming]);
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [lines, chosen, freeAnswer, tried, finished]);
 
-  async function turn(userMsg: ChatTurn, line: Line | null) {
-    setError(null);
-    historyRef.current.push(userMsg);
-    if (line) setLines((l) => [...l, line]);
-    setStreaming("");
-    try {
-      const { text, content } = await streamChat(cfg, {
-        system,
-        history: historyRef.current,
-        onText: (t) => setStreaming(splitCorrection(t).reply),
-        effort: "low",
-      });
-      historyRef.current.push({ role: "assistant", content });
-      const { reply, correction } = splitCorrection(text);
-      setLines((l) => [...l, { role: "assistant", text: reply, correction }]);
-      if (autoSpeak) speak(reply);
-    } catch (e) {
-      historyRef.current.pop();
-      if (line) setLines((l) => l.slice(0, -1));
-      setError((e as Error).message);
-      retryRef.current = () => turn(userMsg, line);
-    } finally {
-      setStreaming(null);
+  function choose(o: DialogueOption) {
+    if (chosen) return;
+    if (o.quality === "wrong") {
+      if (!tried.includes(o)) setMistakes((m) => [...m, { wrong: o.es, correct: best?.es ?? "", explanation: o.feedback }]);
+      setTried((t) => (t.includes(o) ? t : [...t, o]));
+      return;
     }
+    setChosen(o);
+    setPoints((p) => [...p, tried.length ? POINTS_AFTER_RETRY : POINTS[o.quality]]);
+    setLines((l) => [...l, { who: "me", es: o.es }]);
   }
 
-  const send = (text: string) => turn({ role: "user", content: text }, { role: "user", text });
-  const askHelp = () => turn({ role: "user", content: HELP_INSTRUCTION }, { role: "user", text: "💡 Hilfe, was kann ich sagen?", help: true });
-
-  const userTurns = lines.filter((l) => l.role === "user" && !l.help).length;
-
-  async function finish() {
-    setEvaluating(true);
-    setError(null);
-    const transcript = lines
-      .filter((l) => !l.help)
-      .map((l) => `${l.role === "user" ? "Lernender" : "Partner"}: ${l.text}`)
-      .join("\n");
-    try {
-      const fb = await askJSON(cfg, {
-        system: "Du bist ein erfahrener Spanischlehrer und gibst deutschsprachigen Lernenden präzises, motivierendes Feedback.",
-        prompt: feedbackPrompt(level, scenario, transcript),
-        schema: ConversationFeedback,
-        effort: "medium",
-      });
-      setFeedback(fb);
-      update((s) => {
-        let next = addVocab(s, fb.new_vocab, today, scenario.title);
-        next = addMistakes(next, fb.mistakes);
-        next = markDay(next, today, "conversation");
-        return {
-          ...next,
-          conversations: [...next.conversations, { date: today, scenarioId: scenario.id, score: fb.score, summary: fb.summary_de, mistakes: fb.mistakes }],
-        };
-      });
-    } catch (e) {
-      setError((e as Error).message);
-      retryRef.current = finish;
-    } finally {
-      setEvaluating(false);
-    }
+  function next() {
+    setChosen(null);
+    setTried([]);
+    setFreeAnswer(null);
+    if (step + 1 < dialogue.steps.length) setStep(step + 1);
+    else finish();
   }
 
-  if (feedback) {
-    const topics = feedback.topic_ids.map(topicById).filter((t) => t !== undefined);
-    return (
-      <section>
-        <h1>
-          {scenario.emoji} Feedback: {scenario.title}
-        </h1>
-        <div className="card center">
-          <div className="level-big">{feedback.score}/10</div>
-          <p>{feedback.summary_de}</p>
-        </div>
-        {feedback.strengths.length > 0 && (
-          <div className="card">
-            <h3>👍 Das war gut</h3>
-            <ul>{feedback.strengths.map((s, i) => <li key={i}>{s}</li>)}</ul>
-          </div>
-        )}
-        {feedback.mistakes.length > 0 && (
-          <div className="card">
-            <h3>✏️ Verbesserungen</h3>
-            <ul className="mistakes">
-              {feedback.mistakes.map((m, i) => (
-                <li key={i}>
-                  <s>{m.wrong}</s> → <strong>{m.correct}</strong>
-                  <div className="muted">{m.explanation}</div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {feedback.new_vocab.length > 0 && (
-          <div className="card">
-            <h3>🃏 Neu in deinen Vokabeln</h3>
-            <ul>
-              {feedback.new_vocab.map((v, i) => (
-                <li key={i}>
-                  <strong>{v.es}</strong> – {v.de}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {topics.length > 0 && (
-          <div className="card">
-            <h3>📘 Grammatik-Tipp</h3>
-            <div className="chips">
-              {topics.map((t) => (
-                <button key={t.id} className="chip" onClick={() => go("lesson", t.id)}>
-                  {t.title}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        <div className="row">
-          <button className="primary" onClick={() => go("home")}>
-            Fertig
-          </button>
-          <button onClick={onBack}>Noch ein Gespräch</button>
-        </div>
-      </section>
-    );
+  function finish() {
+    setLines((l) => [...l, { who: "npc", es: dialogue.closing, de: dialogue.closingDe }]);
+    if (autoSpeak) speak(dialogue.closing);
+    const score = Math.max(1, Math.round((points.reduce((a, b) => a + b, 0) / dialogue.steps.length) * 10));
+    update((s) => {
+      let next = addVocab(s, dialogue.vocab, today, scenario.title);
+      next = addMistakes(next, mistakes);
+      next = markDay(next, today, "conversation");
+      return { ...next, conversations: [...next.conversations, { date: today, scenarioId: scenario.id, score }] };
+    });
+    setFinished(true);
   }
+
+  const score = Math.max(1, Math.round((points.reduce((a, b) => a + b, 0) / dialogue.steps.length) * 10));
+  const freeMatch = freeAnswer && best ? similarity(freeAnswer, best.es) : 0;
 
   return (
     <section className="chat-view">
@@ -207,46 +128,153 @@ function ChatSession({ state, update, go, today, scenario, onBack }: ViewProps &
           {scenario.emoji} {scenario.title}
         </strong>
         {canSpeak() && (
-          <label className="toggle" title="Antworten automatisch vorlesen">
+          <label className="toggle" title="Partner automatisch vorlesen">
             <input type="checkbox" checked={autoSpeak} onChange={(e) => setAutoSpeak(e.target.checked)} /> 🔊
           </label>
         )}
       </div>
+      {step === 0 && lines.length <= 1 && <p className="muted setup">{scenario.setup}</p>}
+      <div className="progressbar">
+        <div style={{ width: `${((finished ? dialogue.steps.length : step) / dialogue.steps.length) * 100}%` }} />
+      </div>
+
       <div className="chat">
         {lines.map((l, i) => (
-          <div key={i} className={`bubble-wrap ${l.role}`}>
-            <div className={`bubble ${l.role} ${l.help ? "help" : ""}`}>
-              {l.text}
-              {l.role === "assistant" && canSpeak() && (
-                <button className="speak" title="Vorlesen" onClick={() => speak(l.text)}>
-                  🔊
-                </button>
+          <div key={i} className={`bubble-wrap ${l.who === "npc" ? "assistant" : "user"}`}>
+            <div className={`bubble ${l.who === "npc" ? "assistant" : "user"} ${l.free ? "free" : ""}`}>
+              {l.es}
+              {l.who === "npc" && (
+                <span className="bubble-tools">
+                  {canSpeak() && (
+                    <button className="speak" title="Vorlesen" onClick={() => speak(l.es)}>
+                      🔊
+                    </button>
+                  )}
+                  <button className="speak" title="Übersetzung" onClick={() => setShowDe((d) => ({ ...d, [i]: !d[i] }))}>
+                    🇩🇪
+                  </button>
+                </span>
               )}
             </div>
-            {l.correction && <div className="correction">{l.correction}</div>}
+            {l.de && showDe[i] && <div className="translation">{l.de}</div>}
           </div>
         ))}
-        {streaming !== null && <div className="bubble assistant">{streaming || "…"}</div>}
-        {evaluating && <div className="loading">Feedback wird erstellt…</div>}
+        {freeAnswer && !chosen && (
+          <div className="bubble-wrap user">
+            <div className="bubble user free">{freeAnswer}</div>
+          </div>
+        )}
         <div ref={endRef} />
       </div>
-      {error && (
-        <p className="error">
-          {error}{" "}
-          <button className="link" onClick={() => retryRef.current()}>
-            Erneut versuchen
-          </button>
-        </p>
+
+      {!finished && current && (
+        <div className="turn">
+          <div className="task">
+            <small>Deine Aufgabe</small>
+            {current.task}
+          </div>
+
+          {freeFirst && freeAnswer === null && !chosen ? (
+            <>
+              <ChatInput placeholder="Antworte auf Spanisch… (oder 🎤)" onSend={setFreeAnswer} />
+              <div className="row">
+                <button className="link small" onClick={() => setFreeAnswer("")}>
+                  Ich weiß es nicht – Antworten zeigen
+                </button>
+                <label className="toggle small">
+                  <input type="checkbox" checked={freeFirst} onChange={(e) => setFreeFirst(e.target.checked)} /> erst frei antworten
+                </label>
+              </div>
+            </>
+          ) : (
+            <>
+              {freeAnswer && !chosen && (
+                <p className="hint">
+                  {freeMatch >= 0.7
+                    ? "🎯 Sehr nah an der besten Antwort! Welche Variante passt zu dem, was du sagen wolltest?"
+                    : freeMatch >= 0.35
+                      ? "👍 In die richtige Richtung. Vergleiche mit den Vorschlägen:"
+                      : "Vergleiche deine Antwort mit diesen Vorschlägen und wähle die passendste:"}
+                </p>
+              )}
+              <div className="options">
+                {options.map((o) => {
+                  const wasTried = tried.includes(o);
+                  const isChosen = chosen === o;
+                  return (
+                    <div key={o.es}>
+                      <button
+                        className={`option ${wasTried ? "wrong-choice" : ""} ${isChosen ? (o.quality === "best" ? "correct" : "okay") : ""}`}
+                        disabled={wasTried || (!!chosen && !isChosen)}
+                        onClick={() => choose(o)}
+                      >
+                        {o.es}
+                      </button>
+                      {(wasTried || isChosen) && (
+                        <div className={`feedback ${o.quality}`}>
+                          {o.quality === "best" ? "✅ " : o.quality === "ok" ? "🙂 " : "❌ "}
+                          {o.feedback}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {chosen && chosen.quality === "ok" && best && (
+                <p className="muted">
+                  Noch natürlicher: <strong>{best.es}</strong>
+                </p>
+              )}
+              {!chosen && !freeFirst && (
+                <label className="toggle small">
+                  <input type="checkbox" checked={freeFirst} onChange={(e) => setFreeFirst(e.target.checked)} /> erst frei antworten
+                </label>
+              )}
+              {chosen && (
+                <button className="primary big" onClick={next}>
+                  Weiter
+                </button>
+              )}
+            </>
+          )}
+        </div>
       )}
-      <div className="row chat-actions">
-        <button disabled={streaming !== null || evaluating || lines.length === 0} onClick={askHelp}>
-          💡 Hilfe
-        </button>
-        <button disabled={streaming !== null || evaluating || userTurns < MIN_TURNS_FOR_FEEDBACK} onClick={finish} title={userTurns < MIN_TURNS_FOR_FEEDBACK ? `Mindestens ${MIN_TURNS_FOR_FEEDBACK} Antworten` : ""}>
-          ✅ Beenden & Feedback
-        </button>
-      </div>
-      <ChatInput disabled={streaming !== null || evaluating || lines.length === 0} onSend={send} />
+
+      {finished && (
+        <div className="card center">
+          <div className="level-big">{score}/10</div>
+          <p>{score >= 8 ? "¡Bacán! Das Gespräch lief richtig gut." : score >= 5 ? "Gut gemacht! Mit etwas Übung wird es noch natürlicher." : "Guter Anfang – probier das Gespräch bald nochmal."}</p>
+          {mistakes.length > 0 && (
+            <div className="left">
+              <h3>✏️ Merk dir</h3>
+              <ul className="mistakes">
+                {mistakes.map((m, i) => (
+                  <li key={i}>
+                    <s>{m.wrong}</s> → <strong>{m.correct}</strong>
+                    <div className="muted">{m.explanation}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="left">
+            <h3>🃏 Neu in deinen Vokabeln</h3>
+            <ul>
+              {dialogue.vocab.map((v) => (
+                <li key={v.es}>
+                  <strong>{v.es}</strong> – {v.de}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="row center-row">
+            <button className="primary" onClick={() => go("home")}>
+              Fertig
+            </button>
+            <button onClick={onBack}>Anderes Gespräch</button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

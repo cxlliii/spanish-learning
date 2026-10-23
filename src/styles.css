@@ -698,3 +698,143 @@ a {
   padding: 0.35rem 0.4rem;
   border-bottom: 1px solid var(--border);
 }
+
+/* Exercises */
+.option.correct {
+  border-color: var(--ok);
+  background: var(--ok-bg);
+  font-weight: 600;
+}
+.option.okay {
+  border-color: var(--accent);
+  background: var(--warn-bg);
+}
+.option.wrong-choice {
+  border-color: var(--err);
+  background: var(--err-bg);
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+.build-line {
+  min-height: 3.2rem;
+  border-bottom: 2px dashed var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.4rem 0;
+  margin-bottom: 0.75rem;
+}
+.word-bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.word {
+  padding: 0.5rem 0.8rem;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 0 var(--border);
+}
+.word-bank .word:disabled {
+  visibility: hidden;
+}
+.grow {
+  flex: 1;
+}
+.center-row {
+  justify-content: center;
+}
+.left {
+  text-align: left;
+}
+.small {
+  font-size: 0.85rem;
+}
+.rule {
+  padding-left: 0.25rem;
+  font-weight: 500;
+}
+.explanation summary {
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+.card.suggestion.review {
+  border-color: var(--accent);
+}
+.card.suggestion.review small {
+  color: inherit;
+}
+.tag.new {
+  margin-left: 0.5rem;
+}
+
+/* Dialogues */
+.setup {
+  font-style: italic;
+}
+.daily-label {
+  color: var(--primary);
+  font-weight: 700;
+}
+.bubble-tools {
+  white-space: nowrap;
+}
+.bubble.free {
+  opacity: 0.85;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+}
+.translation {
+  max-width: 85%;
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 0 0.5rem;
+}
+.turn {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+.task {
+  background: var(--warn-bg);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.6rem;
+}
+.task small {
+  display: block;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+.hint {
+  font-weight: 600;
+}
+.feedback {
+  font-size: 0.92rem;
+  padding: 0.35rem 0.6rem 0.6rem;
+}
+.feedback.wrong {
+  color: var(--err);
+}
+.feedback.best {
+  color: var(--ok);
+}
+.chat-view .chat-input {
+  position: static;
+}
+.toggle.small {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+/* Bigger touch targets on phones */
+@media (max-width: 480px) {
+  .option {
+    padding: 0.9rem 1rem;
+  }
+  h1 {
+    font-size: 1.4rem;
+  }
+}

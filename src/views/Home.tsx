@@ -1,13 +1,13 @@
 import type { ViewProps } from "../App";
 import { LEVEL_NAMES, nextLevel } from "../data/curriculum";
 import { dailyScenario } from "../data/scenarios";
-import { applyLevel, levelProgress, levelUpReady, nextGrammarTopic, streak } from "../lib/progress";
+import { applyLevel, levelProgress, levelUpReady, newWordsAvailable, nextGrammarTopic, streak } from "../lib/progress";
 import { dueCards } from "../lib/srs";
 
 export default function Home({ state, update, go, today }: ViewProps) {
   if (!state.level) return null;
   const day = state.days[today] ?? {};
-  const due = dueCards(state.cards, today).length;
+  const due = dueCards(state.cards, today).length + newWordsAvailable(state, today);
   const topic = nextGrammarTopic(state);
   const scenario = dailyScenario(state.level, today);
   const days = streak(state.days, today);
@@ -57,7 +57,7 @@ export default function Home({ state, update, go, today }: ViewProps) {
           icon={scenario.emoji}
           title="Gespräch"
           text={scenario.title}
-          hint="ca. 10 Min. · Alltagssprache sprechen"
+          hint="ca. 5 Min. · Alltagssprache sprechen"
           onClick={() => go("conversation", scenario.id)}
         />
         <PlanItem
@@ -65,7 +65,7 @@ export default function Home({ state, update, go, today }: ViewProps) {
           icon="🃏"
           title="Vokabeln"
           text={due ? `${due} Karten fällig` : "Heute nichts fällig"}
-          hint="ca. 5 Min."
+          hint="ca. 3 Min."
           onClick={() => go("vocab")}
         />
         {topic && (
@@ -74,19 +74,13 @@ export default function Home({ state, update, go, today }: ViewProps) {
             icon="📘"
             title="Grammatik"
             text={topic.title}
-            hint={`ca. 10 Min. · ${state.topics[topic.id] ? `${state.topics[topic.id].mastery} % beherrscht` : "neues Thema"}`}
+            hint={`ca. 5 Min. · ${state.topics[topic.id] ? `${state.topics[topic.id].mastery} % beherrscht` : "neues Thema"}`}
             onClick={() => go("lesson", topic.id)}
           />
         )}
       </div>
 
       {doneCount === 3 && <p className="ok center">¡Enhorabuena! Dein Tagesziel ist erreicht. 🎉 Extra-Gespräche sind natürlich immer möglich.</p>}
-      {!state.apiKey && (
-        <div className="card warn">
-          <p>Für Gespräche und Grammatik-Lektionen bitte einen Claude API-Schlüssel hinterlegen.</p>
-          <button onClick={() => go("settings")}>Einstellungen</button>
-        </div>
-      )}
     </section>
   );
 }

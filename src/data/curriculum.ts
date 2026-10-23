@@ -21,24 +21,25 @@ export const CURRICULUM: GrammarTopic[] = [
   // A1
   { id: "ser-estar-basis", level: "A1", title: "ser vs. estar (Grundlagen)", summary: "ser für Identität, Herkunft, Beruf, Eigenschaften; estar für Ort und Zustand." },
   { id: "articulos-genero", level: "A1", title: "Artikel & Genus", summary: "el/la/los/las, un/una; typische Endungen -o/-a, Ausnahmen wie el día, la mano." },
-  { id: "presente-regular", level: "A1", title: "Präsens – regelmäßige Verben", summary: "Konjugation von -ar, -er, -ir Verben im Präsens." },
+  { id: "presente-regular", level: "A1", title: "Präsens – regelmäßige Verben", summary: "Konjugation von -ar, -er, -ir Verben im Präsens. In Lateinamerika kein vosotros: ustedes ist die Mehrzahl von tú und usted." },
   { id: "presente-irregular", level: "A1", title: "Präsens – wichtige unregelmäßige Verben", summary: "tener, ir, hacer, poder, querer, salir, venir, decir; Stammwechsel e>ie, o>ue, e>i." },
   { id: "hay-estar", level: "A1", title: "hay vs. estar", summary: "hay für Existenz (unbestimmt), estar für Lage von Bestimmtem." },
   { id: "gustar", level: "A1", title: "gustar & ähnliche Verben", summary: "me gusta/n, te encanta/n, Satzbau mit indirektem Objektpronomen." },
   { id: "preguntas", level: "A1", title: "Fragewörter", summary: "qué, quién, dónde, cuándo, cómo, cuánto, por qué – mit Akzent." },
-  { id: "posesivos", level: "A1", title: "Possessivbegleiter", summary: "mi, tu, su, nuestro/a, vuestro/a und Plural." },
+  { id: "posesivos", level: "A1", title: "Possessivbegleiter", summary: "mi, tu, su, nuestro/a und Plural; su für usted/ustedes/él/ella (kein vuestro in Lateinamerika)." },
   { id: "reflexivos", level: "A1", title: "Reflexive Verben & Tagesablauf", summary: "levantarse, ducharse, llamarse – Stellung der Reflexivpronomen." },
   // A2
   { id: "indefinido-regular", level: "A2", title: "Pretérito indefinido – regelmäßig", summary: "Abgeschlossene Handlungen in der Vergangenheit: hablé, comí, viví." },
   { id: "indefinido-irregular", level: "A2", title: "Pretérito indefinido – unregelmäßig", summary: "fui, tuve, estuve, hice, pude, dije, vine, puse, supe." },
   { id: "imperfecto", level: "A2", title: "Pretérito imperfecto", summary: "Beschreibungen, Gewohnheiten in der Vergangenheit: hablaba, comía, era, iba." },
   { id: "indefinido-imperfecto", level: "A2", title: "indefinido vs. imperfecto", summary: "Handlung (indefinido) vs. Hintergrund/Gewohnheit (imperfecto)." },
-  { id: "perfecto", level: "A2", title: "Pretérito perfecto", summary: "he hablado – Vergangenheit mit Bezug zur Gegenwart (hoy, este año, ya, todavía no)." },
+  { id: "perfecto", level: "A2", title: "Pretérito perfecto", summary: "he hablado – in Chile seltener als in Spanien: oft wird auch bei hoy/este año das indefinido benutzt; perfecto v. a. für Erfahrungen (¿Has estado en…?, nunca he…)." },
   { id: "ir-a-inf", level: "A2", title: "Nahe Zukunft: ir a + Infinitiv", summary: "voy a comer, vamos a viajar." },
   { id: "pronombres-objeto", level: "A2", title: "Objektpronomen", summary: "Direkte (lo, la, los, las) und indirekte (le, les) Objektpronomen und ihre Stellung." },
   { id: "comparativos", level: "A2", title: "Vergleiche", summary: "más/menos … que, tan … como, mejor/peor, el más …" },
   { id: "estar-gerundio", level: "A2", title: "estar + Gerundium", summary: "Verlaufsform: estoy comiendo; unregelmäßige Gerundien (leyendo, durmiendo)." },
-  { id: "imperativo-afirmativo", level: "A2", title: "Imperativ (bejaht)", summary: "habla, come, ven, pon, di, haz – mit angehängten Pronomen (dímelo)." },
+  { id: "chilenismos", level: "A2", title: "Chilenisches Alltagsspanisch", summary: "po, cachai, al tiro, ya, fome, bacán, pololo/a, carrete, luca, once – die wichtigsten Chilenismen verstehen und benutzen." },
+  { id: "imperativo-afirmativo", level: "A2", title: "Imperativ (bejaht)", summary: "habla, come, ven, pon, di, haz; Höflichkeitsform hable/coma; ustedes-Form hablen – mit angehängten Pronomen (dímelo)." },
   // B1
   { id: "futuro-simple", level: "B1", title: "Futuro simple", summary: "hablaré, tendré, saldré – Zukunft und Vorhersagen." },
   { id: "condicional", level: "B1", title: "Condicional simple", summary: "hablaría, podría – Höflichkeit, Ratschläge, Hypothesen." },
@@ -60,15 +61,16 @@ export const CURRICULUM: GrammarTopic[] = [
   { id: "pasiva-se", level: "B2", title: "Passiv & unpersönliches se", summary: "fue construido, se venden pisos, se dice que…" },
   { id: "perifrasis", level: "B2", title: "Verbalperiphrasen", summary: "acabar de, llevar + gerundio, volver a, dejar de, seguir + gerundio." },
   { id: "ser-estar-adjetivos", level: "B2", title: "ser/estar mit Bedeutungswechsel", summary: "ser listo/estar listo, ser rico/estar rico, ser malo/estar malo." },
+  { id: "voseo-chileno", level: "B2", title: "Chilenisches voseo", summary: "¿Cómo estái? ¿Qué querís? ¿Tenís hora? – informelle Verbformen in Chile verstehen (und wann man sie besser nicht benutzt)." },
   { id: "conectores", level: "B2", title: "Konnektoren", summary: "sin embargo, por lo tanto, a pesar de que, en cambio, además." },
   // C1
   { id: "concesivas-avanzadas", level: "C1", title: "Konzessivsätze für Fortgeschrittene", summary: "por mucho que, por más que, aun cuando, aunque + Indikativ/Subjuntivo." },
   { id: "futuro-probabilidad", level: "C1", title: "Futur & Konditional der Vermutung", summary: "Estará en casa. Serían las diez. Habrá llegado ya." },
   { id: "subjuntivo-relativas", level: "C1", title: "Subjuntivo in Relativsätzen", summary: "Busco a alguien que sepa…, No hay nadie que pueda…" },
   { id: "infinitivo-compuesto", level: "C1", title: "Infinitiv- & Gerundialkonstruktionen", summary: "De haberlo sabido…, Habiendo terminado…, Al llegar…" },
-  { id: "registro", level: "C1", title: "Register: formell vs. umgangssprachlich", summary: "usted/tú, formelle Wendungen, Umgangssprache und Varietäten." },
+  { id: "registro", level: "C1", title: "Register: formell vs. umgangssprachlich", summary: "usted/tú/chilenisches voseo – wann was? Formelle E-Mails, Behördensprache und Umgangssprache in Chile." },
   { id: "marcadores-discurso", level: "C1", title: "Diskursmarker", summary: "o sea, es decir, en fin, de hecho, a fin de cuentas, total que." },
-  { id: "modismos", level: "C1", title: "Redewendungen", summary: "estar en las nubes, tomar el pelo, meter la pata, ser pan comido." },
+  { id: "modismos", level: "C1", title: "Redewendungen", summary: "Lateinamerikanische und chilenische Redewendungen: estar en las nubes, tomar el pelo, meter la pata, ser pan comido, quedar la escoba, sacar la vuelta, echar la talla." },
 ];
 
 export function topicsForLevel(level: Level): GrammarTopic[] {

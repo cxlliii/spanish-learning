@@ -1,13 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ViewProps } from "../App";
-import { addVocab, markDay } from "../lib/progress";
+import { addVocab, introduceNewWords, markDay } from "../lib/progress";
 import { canSpeak, speak } from "../lib/speech";
 import { dueCards, review, type Card, type Grade } from "../lib/srs";
 
 const SESSION_SIZE = 20;
 
 export default function Vocab({ state, update, today }: ViewProps) {
-  const [queue, setQueue] = useState<Card[]>(() => dueCards(state.cards, today).slice(0, SESSION_SIZE));
+  // Today's new words are added when the trainer is opened (idempotent per day).
+  useEffect(() => {
+    update((s) => introduceNewWords(s, today));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const [queue, setQueue] = useState<Card[]>(() => dueCards(introduceNewWords(state, today).cards, today).slice(0, SESSION_SIZE));
+
   const [flipped, setFlipped] = useState(false);
   const [reviewed, setReviewed] = useState(0);
   const [es, setEs] = useState("");
@@ -18,10 +24,10 @@ export default function Vocab({ state, update, today }: ViewProps) {
 
   function grade(g: Grade) {
     if (!card) return;
+    const last = queue.length === 1 && g !== "again";
     update((s) => {
-      const cards = s.cards.map((c) => (c.es === card.es ? review(c, g, today) : c));
-      const next = { ...s, cards };
-      return queue.length === 1 && g !== "again" ? markDay(next, today, "vocab") : next;
+      const next = { ...s, cards: s.cards.map((c) => (c.es === card.es ? review(c, g, today) : c)) };
+      return last ? markDay(next, today, "vocab") : next;
     });
     // "again" puts the card back at the end of today's queue.
     setQueue((q) => (g === "again" ? [...q.slice(1), q[0]] : q.slice(1)));
@@ -42,7 +48,8 @@ export default function Vocab({ state, update, today }: ViewProps) {
       {card ? (
         <>
           <p className="muted">
-            {queue.length} fällig · {reviewed} wiederholt
+            {queue.length} übrig · {reviewed} geschafft
+            {card.reps === 0 && <span className="tag new">neu</span>}
           </p>
           <div className={`flashcard ${flipped ? "flipped" : ""}`} onClick={() => setFlipped(true)}>
             <div className="front">
@@ -86,10 +93,15 @@ export default function Vocab({ state, update, today }: ViewProps) {
           )}
         </>
       ) : (
-        <div className="card center">
-          <div className="level-big">✅</div>
-          <p>{reviewed ? `Super, ${reviewed} Karten wiederholt!` : "Heute ist nichts fällig."} Neue Wörter kommen automatisch aus deinen Gesprächen dazu.</p>
-        </div>
+        (
+          <div className="card center">
+            <div className="level-big">✅</div>
+            <p>
+              {reviewed ? `¡Bacán! ${reviewed} Karten geschafft.` : "Heute ist nichts mehr fällig."} Morgen kommen {state.newPerDay} neue Wörter dazu, außerdem die Vokabeln aus
+              deinen Gesprächen.
+            </p>
+          </div>
+        )
       )}
 
       <div className="card">

@@ -8,11 +8,23 @@ export function speak(text: string): void {
   if (!canSpeak()) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "es-ES";
-  u.rate = 0.95;
-  const voice = window.speechSynthesis.getVoices().find((v) => v.lang.startsWith("es"));
+  const voice = pickVoice(window.speechSynthesis.getVoices());
+  u.lang = voice?.lang ?? "es-CL";
+  u.rate = 0.9;
   if (voice) u.voice = voice;
   window.speechSynthesis.speak(u);
+}
+
+// Chilean voice first, then other Latin American ones, then any Spanish voice.
+const VOICE_PREFERENCE = ["es-CL", "es-419", "es-AR", "es-CO", "es-MX", "es-US"];
+
+function pickVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | undefined {
+  const norm = (l: string) => l.replace("_", "-");
+  for (const lang of VOICE_PREFERENCE) {
+    const v = voices.find((x) => norm(x.lang) === lang);
+    if (v) return v;
+  }
+  return voices.find((x) => x.lang.startsWith("es"));
 }
 
 interface RecognitionLike {
@@ -43,7 +55,7 @@ export function listen(onText: (text: string) => void, onEnd: () => void): () =>
     return () => {};
   }
   const rec = new Ctor();
-  rec.lang = "es-ES";
+  rec.lang = "es-CL";
   rec.interimResults = true;
   rec.continuous = false;
   rec.onresult = (e) => {
@@ -63,8 +75,18 @@ export function normalize(s: string): string {
   return s
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[¿?¡!.,;:"'«»]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Word-overlap similarity (0–1) between a free answer and a model answer. */
+export function similarity(a: string, b: string): number {
+  const wa = new Set(normalize(a).split(" ").filter(Boolean));
+  const wb = new Set(normalize(b).split(" ").filter(Boolean));
+  if (!wa.size || !wb.size) return 0;
+  let common = 0;
+  for (const w of wa) if (wb.has(w)) common++;
+  return (2 * common) / (wa.size + wb.size);
 }

@@ -1,0 +1,800 @@
+import type { LessonContent } from "../types";
+
+export const LESSONS_A2: LessonContent[] = [
+  // ───────────────────────── indefinido-regular
+  {
+    topicId: "indefinido-regular",
+    explanation: [
+      "Das Pretérito indefinido beschreibt abgeschlossene Handlungen zu einem bestimmten Zeitpunkt in der Vergangenheit – typisch mit ayer, anoche, el sábado, el año pasado.",
+      "• -ar: hablé, hablaste, habló, hablamos, hablaron (ustedes/ellos)",
+      "• -er/-ir: comí, comiste, comió, comimos, comieron – viví, viviste, vivió, vivimos, vivieron",
+      "• Akzent beachten: hablo (ich spreche) ≠ habló (er/sie sprach). Schreibung in der yo-Form: buscar → busqué, llegar → llegué, empezar → empecé.",
+      "In Chile benutzt man das Indefinido auch für heute und diese Woche: «Hoy almorcé en el centro» ist ganz normal.",
+    ],
+    examples: [
+      { es: "Ayer almorcé con Camila en Providencia.", de: "Gestern habe ich mit Camila in Providencia zu Mittag gegessen." },
+      { es: "El sábado visitamos el cerro San Cristóbal.", de: "Am Samstag haben wir den Cerro San Cristóbal besucht." },
+      { es: "¿Llamaste a tu mamá?", de: "Hast du deine Mama angerufen?" },
+      { es: "Mis amigos vivieron dos años en Valparaíso.", de: "Meine Freunde haben zwei Jahre in Valparaíso gewohnt." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Ayer yo ___ con mi jefe.",
+        options: ["hablo", "hablé", "habló", "hablaste"],
+        answer: "hablé",
+        explanation: "„Ayer“ verlangt das Indefinido, und die yo-Form von -ar-Verben endet auf -é.",
+      },
+      {
+        type: "choice",
+        prompt: "Anoche ella ___ en un restaurante peruano.",
+        options: ["comí", "comió", "comiste", "comieron"],
+        answer: "comió",
+        explanation: "Für ella (3. Person Singular) endet ein -er-Verb im Indefinido auf -ió.",
+      },
+      {
+        type: "gap",
+        prompt: "El lunes nosotros ___ a Valparaíso en bus. (viajar)",
+        answer: "viajamos",
+        explanation: "Die nosotros-Form von -ar-Verben ist im Indefinido gleich wie im Präsens: viajamos.",
+      },
+      {
+        type: "gap",
+        prompt: "¿A qué hora ___ anoche? (llegar, tú)",
+        answer: "llegaste",
+        explanation: "Die tú-Form endet im Indefinido auf -aste: llegaste.",
+      },
+      {
+        type: "choice",
+        prompt: "Wie lautet die yo-Form von „buscar“ im Indefinido?",
+        options: ["buscé", "busqué", "busquí", "buscó"],
+        answer: "busqué",
+        explanation: "Damit der k-Laut erhalten bleibt, wird c vor e zu qu: busqué.",
+      },
+      {
+        type: "gap",
+        prompt: "Ustedes ___ dos años en Santiago antes de volver a Alemania. (vivir)",
+        answer: "vivieron",
+        explanation: "Ein abgeschlossener Zeitraum (dos años, danach zurück) steht im Indefinido; ustedes-Form: vivieron.",
+      },
+      {
+        type: "build",
+        prompt: "Mein Bruder hat in einem Büro gearbeitet.",
+        answer: "Mi hermano trabajó en una oficina.",
+        explanation: "trabajó = 3. Person Singular Indefinido von trabajar – Akzent auf dem -ó.",
+      },
+      {
+        type: "build",
+        prompt: "Ihr habt den Bus (la micro) genommen.",
+        answer: "Ustedes tomaron la micro.",
+        explanation: "„Ihr“ heißt in Lateinamerika ustedes, Verbform -aron. „La micro“ ist in Chile der Stadtbus.",
+      },
+    ],
+  },
+
+  // ───────────────────────── indefinido-irregular
+  {
+    topicId: "indefinido-irregular",
+    explanation: [
+      "Viele häufige Verben sind im Indefinido unregelmäßig. Sie haben einen eigenen Stamm und Endungen ohne Akzent: -e, -iste, -o, -imos, -ieron.",
+      "• tener → tuve, estar → estuve, poder → pude, poner → puse, saber → supe, venir → vine, hacer → hice (er/sie: hizo)",
+      "• decir → dije, dijiste, dijo, dijimos, dijeron (ohne i in dijeron!)",
+      "• ser und ir sind identisch: fui, fuiste, fue, fuimos, fueron. Der Kontext zeigt die Bedeutung.",
+      "Sehr chilenisch und alltäglich: «¿Cómo te fue?» – Wie ist es gelaufen?",
+    ],
+    examples: [
+      { es: "El fin de semana fuimos a la playa en Viña del Mar.", de: "Am Wochenende sind wir an den Strand in Viña del Mar gefahren." },
+      { es: "No pude ir a la reunión porque tuve un problema con el auto.", de: "Ich konnte nicht zur Besprechung kommen, weil ich ein Problem mit dem Auto hatte." },
+      { es: "¿Qué hiciste ayer? – Estuve en la casa de mis suegros.", de: "Was hast du gestern gemacht? – Ich war bei meinen Schwiegereltern." },
+      { es: "¿Cómo te fue en la entrevista? – Me fue bien.", de: "Wie lief das Vorstellungsgespräch? – Es lief gut." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Ayer yo ___ mucho trabajo.",
+        options: ["tengo", "tuve", "tuvo", "tení"],
+        answer: "tuve",
+        explanation: "tener hat im Indefinido den Stamm tuv-: yo tuve.",
+      },
+      {
+        type: "choice",
+        prompt: "¿Qué ___ ustedes el sábado?",
+        options: ["hicieron", "hacieron", "hizo", "hiceron"],
+        answer: "hicieron",
+        explanation: "hacer → hic-; die ustedes-Form ist hicieron.",
+      },
+      {
+        type: "gap",
+        prompt: "El verano pasado nosotros ___ a Puerto Montt. (ir)",
+        answer: "fuimos",
+        explanation: "ir im Indefinido: fui, fuiste, fue, fuimos, fueron.",
+      },
+      {
+        type: "gap",
+        prompt: "Mi hermana ___ tres semanas en Chile. (estar)",
+        answer: "estuvo",
+        explanation: "Ein abgeschlossener Zeitraum steht im Indefinido; estar → estuv-, 3. Person: estuvo.",
+      },
+      {
+        type: "choice",
+        prompt: "„La fiesta fue increíble.“ – Von welchem Verb kommt „fue“ hier?",
+        options: ["ir", "ser", "hacer", "estar"],
+        answer: "ser",
+        explanation: "Hier wird die Party beschrieben (sie war toll) – also ser. Ohne Ziel (a …) ist es nicht ir.",
+      },
+      {
+        type: "gap",
+        prompt: "¿Por qué no ___ ayer a mi cumpleaños? (venir, tú)",
+        answer: "viniste",
+        explanation: "venir → vin-; tú-Form: viniste.",
+      },
+      {
+        type: "build",
+        prompt: "Er hat mir die Wahrheit gesagt.",
+        answer: "Me dijo la verdad.",
+        explanation: "decir → dijo; das Pronomen me steht vor dem Verb.",
+      },
+      {
+        type: "build",
+        prompt: "Wir konnten nicht in den Park gehen.",
+        answer: "No pudimos ir al parque.",
+        explanation: "poder → pud-; nosotros: pudimos. a + el wird zu al.",
+      },
+    ],
+  },
+
+  // ───────────────────────── imperfecto
+  {
+    topicId: "imperfecto",
+    explanation: [
+      "Das Imperfecto beschreibt die Vergangenheit „im Hintergrund“: Gewohnheiten (früher immer …), Beschreibungen von Personen, Orten und Situationen sowie Uhrzeit und Alter.",
+      "• -ar: hablaba, hablabas, hablaba, hablábamos, hablaban",
+      "• -er/-ir: comía, comías, comía, comíamos, comían (vivir: vivía …)",
+      "• Nur drei unregelmäßige Verben: ser → era, ir → iba, ver → veía",
+      "Typische Signalwörter: antes, siempre, todos los días, de niño/a, cuando era joven.",
+    ],
+    examples: [
+      { es: "Cuando era niña, vivía en Concepción.", de: "Als ich ein Kind war, wohnte ich in Concepción." },
+      { es: "Antes tomábamos once todos los días con mi abuela.", de: "Früher haben wir jeden Tag mit meiner Oma „once“ (Abendbrot) gegessen." },
+      { es: "La casa era pequeña, pero tenía un jardín muy bonito.", de: "Das Haus war klein, aber es hatte einen sehr schönen Garten." },
+      { es: "Eran las diez y llovía mucho.", de: "Es war zehn Uhr und es regnete stark." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "De niño, yo ___ al fútbol todos los días.",
+        options: ["jugaba", "jugué", "juego", "jugó"],
+        answer: "jugaba",
+        explanation: "„Todos los días“ in der Vergangenheit beschreibt eine Gewohnheit → Imperfecto.",
+      },
+      {
+        type: "choice",
+        prompt: "Antes mis abuelos ___ en el campo.",
+        options: ["vivían", "vivía", "vivíamos", "viven"],
+        answer: "vivían",
+        explanation: "„Antes“ beschreibt einen früheren Zustand → Imperfecto; mis abuelos = ellos → vivían.",
+      },
+      {
+        type: "gap",
+        prompt: "Cuando era joven, mi papá ___ todos los días en una mina. (trabajar)",
+        answer: "trabajaba",
+        explanation: "Gewohnheit in der Vergangenheit → Imperfecto: trabajaba.",
+      },
+      {
+        type: "gap",
+        prompt: "Antes nosotros siempre ___ a la playa en febrero. (ir)",
+        answer: "íbamos",
+        explanation: "ir ist im Imperfecto unregelmäßig: iba, ibas, iba, íbamos, iban.",
+      },
+      {
+        type: "choice",
+        prompt: "Welche Verben sind im Imperfecto unregelmäßig?",
+        options: ["ser, ir, ver", "tener, hacer, ir", "ser, estar, ir", "ir, venir, ver"],
+        answer: "ser, ir, ver",
+        explanation: "Nur ser (era), ir (iba) und ver (veía) sind im Imperfecto unregelmäßig.",
+      },
+      {
+        type: "gap",
+        prompt: "La casa de mi abuela ___ muy grande y bonita. (ser)",
+        answer: "era",
+        explanation: "Beschreibungen in der Vergangenheit stehen im Imperfecto: ser → era.",
+      },
+      {
+        type: "build",
+        prompt: "Früher wohnten wir in Valparaíso.",
+        answer: "Antes vivíamos en Valparaíso.",
+        explanation: "Früherer Zustand → Imperfecto; nosotros: vivíamos (mit Akzent).",
+      },
+      {
+        type: "build",
+        prompt: "Als ich ein Kind war, las ich viel.",
+        answer: "Cuando era niño, leía mucho.",
+        explanation: "Alter und Gewohnheit in der Vergangenheit → Imperfecto: era, leía.",
+      },
+    ],
+  },
+
+  // ───────────────────────── indefinido-imperfecto
+  {
+    topicId: "indefinido-imperfecto",
+    explanation: [
+      "In einer Erzählung arbeiten beide Zeiten zusammen: Das Imperfecto malt den Hintergrund, das Indefinido erzählt, was passiert ist.",
+      "• Indefinido: einmalige, abgeschlossene Handlung – ayer, el lunes, de repente, una vez",
+      "• Imperfecto: Gewohnheit, Beschreibung, laufende Handlung – siempre, antes, todos los días, mientras",
+      "• Typisch: laufende Handlung (Imperfecto) wird unterbrochen (Indefinido): «Dormía cuando sonó el teléfono.»",
+      "Tipp: Frag dich, ob etwas „passiert“ (Indefinido) oder ob es „gerade lief / immer so war“ (Imperfecto).",
+    ],
+    examples: [
+      { es: "Caminaba por el centro cuando vi a un amigo.", de: "Ich ging durch das Zentrum, als ich einen Freund sah." },
+      { es: "Hacía frío, así que me puse una chaqueta.", de: "Es war kalt, also zog ich eine Jacke an." },
+      { es: "Antes trabajaba en Santiago, pero el año pasado me fui a vivir a Valdivia.", de: "Früher arbeitete ich in Santiago, aber letztes Jahr bin ich nach Valdivia gezogen." },
+      { es: "Mientras cocinábamos, llegaron los invitados.", de: "Während wir kochten, kamen die Gäste an." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Yo ___ en la ducha cuando sonó el teléfono.",
+        options: ["estaba", "estuve", "estoy"],
+        answer: "estaba",
+        explanation: "Die laufende Situation (unter der Dusche) ist der Hintergrund → Imperfecto.",
+      },
+      {
+        type: "choice",
+        prompt: "Estábamos en la playa cuando de repente ___ a llover.",
+        options: ["empezó", "empezaba", "empieza"],
+        answer: "empezó",
+        explanation: "„De repente“ markiert ein plötzliches Ereignis → Indefinido.",
+      },
+      {
+        type: "gap",
+        prompt: "Todos los veranos mi familia ___ a Pucón. (ir)",
+        answer: "iba",
+        explanation: "„Todos los veranos“ = Gewohnheit → Imperfecto: iba.",
+      },
+      {
+        type: "gap",
+        prompt: "Ayer ___ una carta de mi amiga alemana. (recibir, yo)",
+        answer: "recibí",
+        explanation: "Ein einmaliges Ereignis gestern → Indefinido: recibí.",
+      },
+      {
+        type: "choice",
+        prompt: "Cuando ___ niña, mi mamá me llevaba al colegio.",
+        options: ["era", "fui", "soy"],
+        answer: "era",
+        explanation: "Alter bzw. Lebensphase ist Hintergrund → Imperfecto: era.",
+      },
+      {
+        type: "gap",
+        prompt: "Mientras yo ___ la cena, sonó el timbre. (preparar)",
+        answer: "preparaba",
+        explanation: "Die laufende Handlung wird von der Klingel unterbrochen → Imperfecto: preparaba.",
+      },
+      {
+        type: "build",
+        prompt: "Es regnete, als ich das Haus verließ.",
+        answer: "Llovía cuando salí de casa.",
+        explanation: "Das Wetter ist Hintergrund (llovía), das Hinausgehen ist das Ereignis (salí).",
+      },
+      {
+        type: "build",
+        prompt: "Ich schlief, als du mich angerufen hast.",
+        answer: "Dormía cuando me llamaste.",
+        explanation: "Laufende Handlung (dormía) wird durch den Anruf unterbrochen (llamaste).",
+      },
+    ],
+  },
+
+  // ───────────────────────── perfecto
+  {
+    topicId: "perfecto",
+    explanation: [
+      "Das Pretérito perfecto bildest du mit haber + Partizip: he, has, ha, hemos, han + hablado / comido / vivido.",
+      "• Partizip: -ar → -ado, -er/-ir → -ido. Unregelmäßig: hecho, dicho, visto, escrito, puesto, vuelto, abierto, roto",
+      "• Das Partizip ändert sich nie: Ella ha comido. Ellos han comido.",
+      "• In Chile benutzt man das Perfecto vor allem für Erfahrungen und „bis jetzt“: ¿Has estado en Chiloé? Nunca he probado el curanto. Todavía no he terminado.",
+      "Für heute oder diese Woche sagt man in Chile meist das Indefinido: «Hoy fui al centro» statt «Hoy he ido al centro».",
+    ],
+    examples: [
+      { es: "¿Has estado alguna vez en el desierto de Atacama?", de: "Warst du schon einmal in der Atacama-Wüste?" },
+      { es: "Nunca he probado las empanadas de pino.", de: "Ich habe noch nie Empanadas de pino probiert." },
+      { es: "Todavía no hemos visto Torres del Paine.", de: "Wir haben Torres del Paine noch nicht gesehen." },
+      { es: "Mis suegros ya han viajado muchas veces a Europa.", de: "Meine Schwiegereltern sind schon oft nach Europa gereist." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Nosotros nunca ___ en el sur de Chile.",
+        options: ["hemos estado", "han estado", "hemos estada", "he estado"],
+        answer: "hemos estado",
+        explanation: "nosotros → hemos; das Partizip bleibt unverändert auf -o: estado.",
+      },
+      {
+        type: "choice",
+        prompt: "Wie lautet das Partizip von „hacer“?",
+        options: ["hacido", "hecho", "hizo", "haciendo"],
+        answer: "hecho",
+        explanation: "hacer hat ein unregelmäßiges Partizip: hecho.",
+      },
+      {
+        type: "gap",
+        prompt: "¿Alguna vez has ___ mote con huesillo? (probar)",
+        answer: "probado",
+        explanation: "-ar-Verben bilden das Partizip auf -ado. Mote con huesillo ist ein typisch chilenisches Sommergetränk.",
+      },
+      {
+        type: "gap",
+        prompt: "Mi hermano todavía no ha ___ el informe. (escribir)",
+        answer: "escrito",
+        explanation: "escribir hat ein unregelmäßiges Partizip: escrito.",
+      },
+      {
+        type: "choice",
+        prompt: "Wie sagt man in Chile am natürlichsten: „Heute bin ich ins Zentrum gegangen“?",
+        options: ["Hoy fui al centro.", "Hoy iba al centro.", "Hoy voy al centro."],
+        answer: "Hoy fui al centro.",
+        explanation: "In Chile benutzt man für abgeschlossene Handlungen von heute meist das Indefinido.",
+      },
+      {
+        type: "gap",
+        prompt: "Mis papás nunca ___ visto la nieve. (haber)",
+        answer: "han",
+        explanation: "mis papás = ellos → han + Partizip.",
+      },
+      {
+        type: "build",
+        prompt: "Ich war noch nie in Patagonien.",
+        answer: "Nunca he estado en la Patagonia.",
+        explanation: "Lebenserfahrung („noch nie“) → Perfecto: nunca he estado.",
+      },
+      {
+        type: "build",
+        prompt: "Das habe ich noch nie gemacht.",
+        answer: "Nunca he hecho eso.",
+        explanation: "Erfahrung mit nunca → Perfecto; hacer → hecho.",
+      },
+    ],
+  },
+
+  // ───────────────────────── ir-a-inf
+  {
+    topicId: "ir-a-inf",
+    explanation: [
+      "Mit ir a + Infinitiv sprichst du über Pläne und die nahe Zukunft. In Lateinamerika ist das im Alltag viel häufiger als das Futur (hablaré).",
+      "• voy, vas, va, vamos, van + a + Infinitiv: Voy a llamar a mi mamá.",
+      "• Pronomen stehen vor ir oder hängen am Infinitiv: Lo voy a comprar = Voy a comprarlo.",
+      "• ¡Vamos a …! kann auch „Lass uns …!“ bedeuten: ¡Vamos a bailar!",
+    ],
+    examples: [
+      { es: "Este fin de semana vamos a visitar a mis suegros en Rancagua.", de: "Dieses Wochenende besuchen wir meine Schwiegereltern in Rancagua." },
+      { es: "¿Qué vas a hacer en las vacaciones?", de: "Was machst du in den Ferien?" },
+      { es: "Mañana voy a buscar departamento en Ñuñoa.", de: "Morgen suche ich eine Wohnung in Ñuñoa." },
+      { es: "Parece que va a llover.", de: "Es sieht so aus, als würde es regnen." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Mañana yo ___ a trabajar desde la casa.",
+        options: ["voy", "va", "vas", "vamos"],
+        answer: "voy",
+        explanation: "yo → voy a + Infinitiv.",
+      },
+      {
+        type: "choice",
+        prompt: "Ellos van ___ un auto nuevo.",
+        options: ["a comprar", "comprar", "de comprar", "a compran"],
+        answer: "a comprar",
+        explanation: "Nach ir kommt immer a + Infinitiv (Grundform).",
+      },
+      {
+        type: "gap",
+        prompt: "Esta noche nosotros ___ a cocinar pastel de choclo. (ir)",
+        answer: "vamos",
+        explanation: "nosotros → vamos a + Infinitiv. Pastel de choclo ist ein chilenischer Maisauflauf.",
+      },
+      {
+        type: "gap",
+        prompt: "¿Ustedes ___ a viajar al norte en enero? (ir)",
+        answer: "van",
+        explanation: "ustedes → van a + Infinitiv.",
+      },
+      {
+        type: "choice",
+        prompt: "Wie sagst du „Ich werde es morgen kaufen“?",
+        options: ["Lo voy a comprar mañana.", "Voy a lo comprar mañana.", "Voy lo a comprar mañana.", "Voy a comprar lo mañana."],
+        answer: "Lo voy a comprar mañana.",
+        explanation: "Das Pronomen steht vor dem konjugierten Verb (lo voy) oder hängt direkt am Infinitiv (comprarlo).",
+      },
+      {
+        type: "gap",
+        prompt: "Hace mucho frío. Creo que ___ a nevar en la cordillera. (ir)",
+        answer: "va",
+        explanation: "Bei Wetter ist das Subjekt „es“ (3. Person Singular) → va a nevar.",
+      },
+      {
+        type: "build",
+        prompt: "Wir werden ins Kino gehen.",
+        answer: "Vamos a ir al cine.",
+        explanation: "vamos a + ir: auch ir selbst kann der Infinitiv sein. a + el = al.",
+      },
+      {
+        type: "build",
+        prompt: "Was wirst du morgen machen?",
+        answer: "¿Qué vas a hacer mañana?",
+        explanation: "tú → vas a + Infinitiv; das Fragewort qué steht am Anfang.",
+      },
+    ],
+  },
+
+  // ───────────────────────── pronombres-objeto
+  {
+    topicId: "pronombres-objeto",
+    explanation: [
+      "Objektpronomen ersetzen ein Nomen, damit du es nicht wiederholen musst.",
+      "• Direktes Objekt (wen/was?): lo (ihn/es), la (sie/es), los, las – dazu me, te, nos.",
+      "• Indirektes Objekt (wem?): le (ihm/ihr/Ihnen), les (ihnen/euch) – dazu me, te, nos.",
+      "• Stellung: vor dem konjugierten Verb (Lo compro) oder angehängt an Infinitiv/Gerundium (Voy a comprarlo).",
+      "In Lateinamerika sagt man für männliche Personen im direkten Objekt lo: «Lo vi ayer» (nicht le). Beim indirekten Objekt wird le oft doppelt benutzt: «Le di el regalo a mi mamá».",
+    ],
+    examples: [
+      { es: "¿Tienes las llaves? – Sí, las tengo.", de: "Hast du die Schlüssel? – Ja, ich habe sie." },
+      { es: "Le escribí un mensaje a mi jefa.", de: "Ich habe meiner Chefin eine Nachricht geschrieben." },
+      { es: "¿Conoces a Diego? – Sí, lo conocí en una fiesta.", de: "Kennst du Diego? – Ja, ich habe ihn auf einer Party kennengelernt." },
+      { es: "Voy a llamarte mañana.", de: "Ich rufe dich morgen an." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "¿Compraste el pan? – Sí, ___ compré.",
+        options: ["lo", "la", "le", "los"],
+        answer: "lo",
+        explanation: "el pan ist männlich, Singular und direktes Objekt → lo.",
+      },
+      {
+        type: "choice",
+        prompt: "¿Dónde están mis llaves? – No sé, no ___ veo.",
+        options: ["las", "los", "les", "la"],
+        answer: "las",
+        explanation: "las llaves: weiblich, Plural, direktes Objekt → las.",
+      },
+      {
+        type: "gap",
+        prompt: "¿Viste a Fernanda? – Sí, ___ vi en la oficina.",
+        answer: "la",
+        explanation: "Fernanda ist eine Frau und direktes Objekt (wen?) → la.",
+      },
+      {
+        type: "gap",
+        prompt: "Para Navidad ___ di un regalo a mis papás.",
+        answer: "les",
+        explanation: "Wem? → mis papás (Plural) = indirektes Objekt → les. Das Pronomen steht zusätzlich zu „a mis papás“.",
+      },
+      {
+        type: "choice",
+        prompt: "Hablé con mi jefe y ___ expliqué el problema.",
+        options: ["le", "lo", "la", "les"],
+        answer: "le",
+        explanation: "Ich erkläre wem? → meinem Chef (indirektes Objekt, Singular) → le. Das direkte Objekt ist el problema.",
+      },
+      {
+        type: "gap",
+        prompt: "Estas empanadas están ricas. ¿___ quieres probar?",
+        answer: "Las",
+        accept: ["las"],
+        explanation: "las empanadas: weiblich Plural, direktes Objekt → las, vor dem konjugierten Verb.",
+      },
+      {
+        type: "build",
+        prompt: "Ich kenne sie nicht.",
+        answer: "No la conozco.",
+        explanation: "Reihenfolge: no + Pronomen + Verb.",
+      },
+      {
+        type: "build",
+        prompt: "Ich schreibe meiner Mutter eine Nachricht.",
+        answer: "Le escribo un mensaje a mi mamá.",
+        explanation: "Das indirekte Objekt wird im Spanischen meist doppelt genannt: le … a mi mamá.",
+      },
+    ],
+  },
+
+  // ───────────────────────── comparativos
+  {
+    topicId: "comparativos",
+    explanation: [
+      "• Ungleichheit: más / menos + Adjektiv/Nomen + que: Santiago es más grande que Valparaíso.",
+      "• Gleichheit: tan + Adjektiv + como (so … wie); tanto/a/os/as + Nomen + como (so viel/viele … wie).",
+      "• Unregelmäßig: bueno → mejor, malo → peor; beim Alter: mayor (älter), menor (jünger).",
+      "• Superlativ: el/la/los/las + más + Adjektiv + de: Es el cerro más alto de la ciudad.",
+      "Vor Zahlen sagt man más de: Cuesta más de diez mil pesos.",
+    ],
+    examples: [
+      { es: "Santiago es más grande que Valparaíso.", de: "Santiago ist größer als Valparaíso." },
+      { es: "El vino chileno es tan bueno como el vino francés.", de: "Der chilenische Wein ist so gut wie der französische." },
+      { es: "Mi hermano es mayor que yo.", de: "Mein Bruder ist älter als ich." },
+      { es: "Este es el mejor completo de Santiago.", de: "Das ist der beste Completo (Hotdog) in Santiago." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Puerto Montt es ___ lluvioso que Santiago.",
+        options: ["más", "tan", "como", "mejor"],
+        answer: "más",
+        explanation: "Vergleich mit que → más + Adjektiv + que.",
+      },
+      {
+        type: "choice",
+        prompt: "Mi departamento es tan grande ___ el tuyo.",
+        options: ["como", "que", "de", "más"],
+        answer: "como",
+        explanation: "Gleichheit: tan + Adjektiv + como.",
+      },
+      {
+        type: "gap",
+        prompt: "Este café es ___ que el otro: ¡está riquísimo! (bueno)",
+        answer: "mejor",
+        explanation: "bueno hat eine unregelmäßige Steigerung: mejor (nicht „más bueno“).",
+      },
+      {
+        type: "gap",
+        prompt: "Mi hermana tiene 30 años y yo tengo 25. Ella es ___ que yo. (Alter)",
+        answer: "mayor",
+        accept: ["más grande"],
+        explanation: "Beim Alter sagt man mayor (älter). In Chile hört man umgangssprachlich auch „más grande“.",
+      },
+      {
+        type: "choice",
+        prompt: "Wie sagt man „Das ist das teuerste Restaurant der Stadt“?",
+        options: [
+          "Es el restaurante más caro de la ciudad.",
+          "Es el restaurante más caro que la ciudad.",
+          "Es el más restaurante caro de la ciudad.",
+          "Es el restaurante tan caro de la ciudad.",
+        ],
+        answer: "Es el restaurante más caro de la ciudad.",
+        explanation: "Superlativ: el + Nomen + más + Adjektiv + de.",
+      },
+      {
+        type: "gap",
+        prompt: "Hoy no hace ___ calor como ayer.",
+        answer: "tanto",
+        explanation: "Vor einem Nomen (el calor, männlich) steht tanto … como.",
+      },
+      {
+        type: "build",
+        prompt: "Mein Spanisch ist schlechter als deins.",
+        answer: "Mi español es peor que el tuyo.",
+        explanation: "malo → peor; „deins“ = el tuyo.",
+      },
+      {
+        type: "build",
+        prompt: "Das Auto ist schneller als das Fahrrad.",
+        answer: "El auto es más rápido que la bicicleta.",
+        explanation: "más + Adjektiv + que. In Lateinamerika sagt man el auto (nicht el coche).",
+      },
+    ],
+  },
+
+  // ───────────────────────── estar-gerundio
+  {
+    topicId: "estar-gerundio",
+    explanation: [
+      "Mit estar + Gerundium beschreibst du, was gerade jetzt passiert – wie „ich bin gerade am Kochen“.",
+      "• -ar → -ando: hablando, trabajando; -er/-ir → -iendo: comiendo, viviendo",
+      "• Unregelmäßig: leer → leyendo, ir → yendo, oír → oyendo; e → i und o → u: decir → diciendo, pedir → pidiendo, dormir → durmiendo",
+      "• Pronomen vor estar oder angehängt (dann mit Akzent): Me estoy duchando = Estoy duchándome.",
+      "In Chile hörst du oft «¿Qué estái haciendo?» – das ist die lockere Form von «¿Qué estás haciendo?».",
+    ],
+    examples: [
+      { es: "¿Qué estás haciendo? – Estoy preparando la once.", de: "Was machst du gerade? – Ich mache gerade die „once“ (Abendbrot)." },
+      { es: "Mi pololo todavía está durmiendo.", de: "Mein Freund schläft noch." },
+      { es: "Estamos esperando la micro desde hace veinte minutos.", de: "Wir warten seit zwanzig Minuten auf den Bus." },
+      { es: "Los niños están jugando en la plaza.", de: "Die Kinder spielen gerade auf dem Platz." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Ahora mismo yo ___ trabajando.",
+        options: ["estoy", "soy", "estás", "está"],
+        answer: "estoy",
+        explanation: "Die Verlaufsform wird immer mit estar gebildet: yo estoy.",
+      },
+      {
+        type: "choice",
+        prompt: "Wie lautet das Gerundium von „leer“?",
+        options: ["leiendo", "leyendo", "leendo", "leído"],
+        answer: "leyendo",
+        explanation: "Zwischen zwei Vokalen wird -iendo zu -yendo: leyendo.",
+      },
+      {
+        type: "gap",
+        prompt: "Mi abuela está ___ siesta. (dormir)",
+        answer: "durmiendo",
+        explanation: "dormir ändert im Gerundium o → u: durmiendo.",
+      },
+      {
+        type: "gap",
+        prompt: "¿Qué ___ haciendo ustedes? (estar)",
+        answer: "están",
+        explanation: "ustedes → están + Gerundium.",
+      },
+      {
+        type: "choice",
+        prompt: "„Ella se está duchando“ bedeutet dasselbe wie: Ella está ___.",
+        options: ["duchándose", "duchandose", "se duchando", "duchándola"],
+        answer: "duchándose",
+        explanation: "Wird das Pronomen angehängt, braucht das Gerundium einen Akzent: duchándose.",
+      },
+      {
+        type: "gap",
+        prompt: "Perdón, no te escuché. ¿Qué estás ___? (decir)",
+        answer: "diciendo",
+        explanation: "decir ändert im Gerundium e → i: diciendo.",
+      },
+      {
+        type: "build",
+        prompt: "Wir lernen gerade Spanisch.",
+        answer: "Estamos aprendiendo español.",
+        explanation: "nosotros → estamos; aprender → aprendiendo.",
+      },
+      {
+        type: "build",
+        prompt: "Ich lese gerade ein Buch.",
+        answer: "Estoy leyendo un libro.",
+        explanation: "estar + Gerundium; leer → leyendo.",
+      },
+    ],
+  },
+
+  // ───────────────────────── chilenismos
+  {
+    topicId: "chilenismos",
+    explanation: [
+      "In Chile hörst du jeden Tag eigene Wörter. Die meisten sind umgangssprachlich – perfekt für Freunde, Familie und lockere Situationen:",
+      "• po: Verstärkung am Satzende (von «pues»): sí po, no po, ya po",
+      "• ¿cachai?: Verstehst du? / Weißt du? (cachar = verstehen) – sehr locker",
+      "• ya: okay, einverstanden; al tiro: sofort",
+      "• fome: langweilig; bacán: super, toll",
+      "• pololo/a: fester Freund / feste Freundin; carrete: Party (carretear = feiern gehen)",
+      "• luca: 1.000 Pesos (cinco lucas = 5.000); once: Abendbrot mit Tee, Brot, Käse usw.",
+      "Im Büro, bei Behörden oder mit Älteren, die du nicht kennst, lieber neutral sprechen: «¿Me entiende?» statt «¿cachai?».",
+    ],
+    examples: [
+      { es: "¿Vamos al carrete el sábado? – ¡Ya po, bacán!", de: "Gehen wir am Samstag zur Party? – Klar, super!" },
+      { es: "Llego al tiro, estoy a dos cuadras.", de: "Ich bin sofort da, ich bin zwei Blocks entfernt." },
+      { es: "La película estuvo súper fome.", de: "Der Film war total langweilig." },
+      { es: "Mi polola me invitó a tomar once con su familia.", de: "Meine Freundin hat mich zur „once“ mit ihrer Familie eingeladen." },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Was macht „po“ in „Sí po“?",
+        options: [
+          "Es verstärkt die Aussage (wie „ja doch“).",
+          "Es macht die Aussage zur Frage.",
+          "Es verneint die Aussage.",
+          "Es macht die Aussage höflicher.",
+        ],
+        answer: "Es verstärkt die Aussage (wie „ja doch“).",
+        explanation: "po kommt von „pues“ und verstärkt nur – „sí po“ heißt „ja klar“.",
+      },
+      {
+        type: "choice",
+        prompt: "Was bedeutet „¿cachai?“ am Satzende?",
+        options: ["Verstehst du?", "Bist du sicher?", "Hast du Hunger?", "Kommst du mit?"],
+        answer: "Verstehst du?",
+        explanation: "cachar = verstehen; „¿cachai?“ ist die lockere chilenische Form von „¿entiendes?“.",
+      },
+      {
+        type: "gap",
+        prompt: "¿Nos juntamos a las ocho? – ___, perfecto. (okay, chilenisch)",
+        answer: "Ya",
+        accept: ["ya"],
+        explanation: "„Ya“ heißt in Chile „okay, einverstanden“ – nicht nur „schon“.",
+      },
+      {
+        type: "gap",
+        prompt: "Espérame, voy ___. (sofort, chilenisch)",
+        answer: "al tiro",
+        explanation: "„Al tiro“ bedeutet „sofort“.",
+      },
+      {
+        type: "choice",
+        prompt: "Wie stellst du in Chile deinen festen Freund vor?",
+        options: ["Él es mi pololo.", "Él es mi carrete.", "Él es mi luca.", "Él es mi once."],
+        answer: "Él es mi pololo.",
+        explanation: "pololo/polola = fester Freund / feste Freundin. „Novio“ klingt in Chile eher nach Verlobung.",
+      },
+      {
+        type: "gap",
+        prompt: "Esta película es muy ___. Me estoy durmiendo. (langweilig, chilenisch)",
+        answer: "fome",
+        explanation: "„Fome“ ist das chilenische Wort für langweilig.",
+      },
+      {
+        type: "build",
+        prompt: "Die Party war super.",
+        answer: "El carrete estuvo bacán.",
+        explanation: "carrete = Party, bacán = super. Für Erlebnisse sagt man in Chile oft „estuvo“.",
+      },
+      {
+        type: "build",
+        prompt: "Das Essen kostet fünf Lucas.",
+        answer: "La comida cuesta cinco lucas.",
+        explanation: "Eine luca sind 1.000 Pesos – cinco lucas = 5.000 Pesos.",
+      },
+    ],
+  },
+
+  // ───────────────────────── imperativo-afirmativo
+  {
+    topicId: "imperativo-afirmativo",
+    explanation: [
+      "Mit dem Imperativ gibst du Anweisungen, Bitten oder Tipps.",
+      "• tú: wie die 3. Person Präsens: habla, come, escribe. Unregelmäßig: ven, pon, di, haz, sal, ten, ve, sé",
+      "• usted: Endung wechselt (-ar → -e, -er/-ir → -a): hable, coma, escriba. ustedes: hablen, coman, escriban – auch unter Freunden, denn es gibt kein vosotros.",
+      "• Pronomen werden angehängt, oft mit Akzent: dime, dímelo, llámame, siéntese.",
+      "In Chile macht man Bitten gern weicher, z. B. mit «por fa» oder als Frage: «¿Me pasas la sal?»",
+    ],
+    examples: [
+      { es: "Pasa, ponte cómodo.", de: "Komm rein, mach es dir bequem." },
+      { es: "Siga derecho dos cuadras y doble a la derecha.", de: "Gehen Sie zwei Blocks geradeaus und biegen Sie rechts ab." },
+      { es: "Llámame mañana, por fa.", de: "Ruf mich morgen an, bitte." },
+      { es: "Niños, vengan a tomar once.", de: "Kinder, kommt zur „once“ (Abendbrot)!" },
+    ],
+    exercises: [
+      {
+        type: "choice",
+        prompt: "Juan, ___ la ventana, por favor. (tú)",
+        options: ["abre", "abra", "abres", "abran"],
+        answer: "abre",
+        explanation: "Der tú-Imperativ entspricht der 3. Person Präsens: abre.",
+      },
+      {
+        type: "choice",
+        prompt: "Señora, ___ aquí, por favor. (usted)",
+        options: ["firme", "firma", "firmas", "firman"],
+        answer: "firme",
+        explanation: "usted-Imperativ: bei -ar-Verben wird die Endung zu -e: firme.",
+      },
+      {
+        type: "gap",
+        prompt: "___ aquí, Sofía. ¡Rápido! (venir)",
+        answer: "Ven",
+        accept: ["ven"],
+        explanation: "venir hat einen unregelmäßigen tú-Imperativ: ven.",
+      },
+      {
+        type: "gap",
+        prompt: "Chicos, ___ la mesa, por favor. (poner)",
+        answer: "pongan",
+        explanation: "Mehrere Personen → ustedes-Form: pongan (vom Stamm pong- aus pongo).",
+      },
+      {
+        type: "choice",
+        prompt: "Wie sagst du zu einem Freund „Sag es mir!“?",
+        options: ["¡Dímelo!", "¡Dimelo!", "¡Me lo di!", "¡Dígamelo!"],
+        answer: "¡Dímelo!",
+        explanation: "tú → di; Pronomen werden angehängt (me + lo) und der Akzent bleibt auf di: dímelo. „Dígamelo“ ist die usted-Form.",
+      },
+      {
+        type: "gap",
+        prompt: "Por favor, ___ derecho dos cuadras. (seguir, usted)",
+        answer: "siga",
+        explanation: "seguir → sigo → usted-Imperativ: siga.",
+      },
+      {
+        type: "build",
+        prompt: "Mach deine Hausaufgaben!",
+        answer: "¡Haz tus tareas!",
+        explanation: "hacer hat den unregelmäßigen tú-Imperativ haz.",
+      },
+      {
+        type: "build",
+        prompt: "Ruf mich morgen an, bitte.",
+        answer: "Llámame mañana, por favor.",
+        explanation: "Das Pronomen wird an den Imperativ angehängt; llama + me = llámame (mit Akzent).",
+      },
+    ],
+  },
+];

@@ -1,31 +1,48 @@
 import { LEVELS, type Level } from "./curriculum";
 
+export type Goal = "reisen" | "beruf" | "beziehung" | "auswandern";
+
+export const GOAL_LABELS: Record<Goal, string> = {
+  reisen: "Reisen",
+  beruf: "Beruf",
+  beziehung: "Partner & Familie",
+  auswandern: "Leben in Chile",
+};
+
 export interface Scenario {
   id: string;
   minLevel: Level;
+  goal: Goal;
   emoji: string;
   title: string;
-  /** Instruction for the AI partner: who it plays and what the situation is. */
+  /** German description of the situation, shown before the dialogue starts. */
   setup: string;
 }
 
 export const SCENARIOS: Scenario[] = [
-  { id: "cafe", minLevel: "A1", emoji: "☕", title: "Im Café bestellen", setup: "Eres camarero/a en un café de Madrid. El usuario es un cliente que quiere pedir algo de beber y de comer." },
-  { id: "presentarse", minLevel: "A1", emoji: "👋", title: "Sich vorstellen", setup: "Eres una persona simpática que conoce al usuario en una fiesta. Quieres saber de dónde es, a qué se dedica y qué le gusta." },
-  { id: "supermercado", minLevel: "A1", emoji: "🛒", title: "Einkaufen auf dem Markt", setup: "Eres vendedor/a en un mercado de frutas y verduras en Valencia. El usuario quiere comprar." },
-  { id: "direcciones", minLevel: "A1", emoji: "🗺️", title: "Nach dem Weg fragen", setup: "Eres un/a vecino/a en Sevilla. El usuario está perdido y te pregunta cómo llegar a la estación, al museo o a una farmacia." },
-  { id: "fin-de-semana", minLevel: "A2", emoji: "🎉", title: "Über das Wochenende reden", setup: "Eres un/a compañero/a de trabajo. Es lunes por la mañana y le preguntas al usuario qué hizo el fin de semana. Cuenta tú también algo." },
-  { id: "restaurante", minLevel: "A2", emoji: "🍽️", title: "Im Restaurant", setup: "Eres camarero/a en un restaurante en Barcelona. Recomiendas platos, tomas el pedido y luego hay un pequeño problema con la cuenta." },
-  { id: "medico", minLevel: "A2", emoji: "🩺", title: "Beim Arzt", setup: "Eres médico/a de cabecera. El usuario viene porque no se siente bien. Pregunta por los síntomas y da consejos." },
-  { id: "hotel", minLevel: "A2", emoji: "🏨", title: "Hotel-Check-in", setup: "Eres recepcionista de un hotel en Málaga. El usuario llega para hacer el check-in; hay una confusión con la reserva." },
-  { id: "piso", minLevel: "B1", emoji: "🏠", title: "Eine Wohnung besichtigen", setup: "Eres el/la propietario/a de un piso en alquiler en Madrid. El usuario viene a verlo y tiene preguntas sobre el precio, los gastos y el barrio." },
-  { id: "planes", minLevel: "B1", emoji: "📅", title: "Pläne mit Freunden machen", setup: "Eres un/a amigo/a del usuario. Queréis organizar un viaje juntos y tenéis opiniones distintas sobre el destino y el presupuesto." },
-  { id: "reclamacion", minLevel: "B1", emoji: "📦", title: "Eine Reklamation", setup: "Trabajas en atención al cliente de una tienda online. El usuario llama porque su pedido llegó roto. Sé amable pero sigue el protocolo." },
-  { id: "entrevista", minLevel: "B2", emoji: "💼", title: "Vorstellungsgespräch", setup: "Eres responsable de recursos humanos en una empresa española. Haces una entrevista de trabajo al usuario con preguntas sobre su experiencia y sus motivaciones." },
-  { id: "debate", minLevel: "B2", emoji: "🗣️", title: "Diskussion: Stadt vs. Land", setup: "Eres un/a amigo/a con opiniones fuertes. Debates con el usuario si es mejor vivir en la ciudad o en el campo. Defiende tu postura con argumentos." },
-  { id: "noticias", minLevel: "B2", emoji: "📰", title: "Über Nachrichten sprechen", setup: "Eres un/a compañero/a que comenta noticias de actualidad (tecnología, medio ambiente, cultura). Pide la opinión del usuario y argumenta." },
-  { id: "negociacion", minLevel: "C1", emoji: "🤝", title: "Geschäftsverhandlung", setup: "Eres un/a proveedor/a que negocia un contrato con el usuario. Usa un registro formal y defiende tus condiciones con matices." },
-  { id: "filosofia", minLevel: "C1", emoji: "🤔", title: "Tiefgründiges Gespräch", setup: "Eres un/a amigo/a culto/a. Conversáis sobre temas abstractos: la felicidad, la tecnología y el sentido del trabajo. Usa expresiones idiomáticas." },
+  // A1
+  { id: "cafe", minLevel: "A1", goal: "reisen", emoji: "☕", title: "Im Café bestellen", setup: "Du bist in einem Café in Santiago (Providencia) und bestellst einen Kaffee und etwas zu essen." },
+  { id: "presentarse", minLevel: "A1", goal: "beziehung", emoji: "👋", title: "Sich vorstellen", setup: "Auf einem Asado lernst du eine Freundin deiner Freunde kennen. Ihr erzählt, wer ihr seid und was ihr macht." },
+  { id: "feria", minLevel: "A1", goal: "auswandern", emoji: "🥑", title: "Auf der Feria einkaufen", setup: "Samstagmorgen auf der Feria (Wochenmarkt): Du kaufst Paltas, Tomaten und Obst." },
+  { id: "metro", minLevel: "A1", goal: "reisen", emoji: "🚇", title: "Nach dem Weg fragen", setup: "Du suchst in Santiago die Metro-Station und brauchst eine Tarjeta Bip! zum Fahren." },
+  // A2
+  { id: "hostal", minLevel: "A2", goal: "reisen", emoji: "🏨", title: "Check-in im Hostal", setup: "Du kommst in einem Hostal in Valparaíso an. Bei deiner Reservierung gibt es ein kleines Problem." },
+  { id: "restaurante", minLevel: "A2", goal: "reisen", emoji: "🍽️", title: "Im Restaurant", setup: "Mittagessen in einem Restaurant: Du fragst nach dem Menú del día, bestellst und bezahlst." },
+  { id: "farmacia", minLevel: "A2", goal: "auswandern", emoji: "💊", title: "In der Apotheke", setup: "Du hast Halsschmerzen und Fieber und fragst in der Apotheke um Rat." },
+  { id: "fin-de-semana", minLevel: "A2", goal: "beruf", emoji: "🎉", title: "Montag im Büro", setup: "Montagmorgen: Ein Kollege fragt dich, was du am Wochenende gemacht hast." },
+  { id: "familia-pololo", minLevel: "A2", goal: "beziehung", emoji: "👨‍👩‍👧", title: "Die Familie kennenlernen", setup: "Du bist zum ersten Mal zum Sonntagsessen bei der Familie deines Pololos / deiner Polola eingeladen." },
+  // B1
+  { id: "arriendo", minLevel: "B1", goal: "auswandern", emoji: "🏠", title: "Wohnung besichtigen", setup: "Du besichtigst ein Departamento zur Miete in Ñuñoa und fragst nach Preis, Gastos comunes und Bedingungen." },
+  { id: "banco", minLevel: "B1", goal: "auswandern", emoji: "🏦", title: "Ein Konto eröffnen", setup: "Du willst bei der Bank eine CuentaRUT eröffnen und fragst, welche Dokumente du brauchst." },
+  { id: "primer-dia", minLevel: "B1", goal: "beruf", emoji: "💼", title: "Erster Arbeitstag", setup: "Dein erster Tag in einem Büro in Santiago: Deine Chefin stellt dir das Team und die Aufgaben vor." },
+  { id: "viaje-sur", minLevel: "B1", goal: "beziehung", emoji: "🏔️", title: "Reise in den Süden planen", setup: "Mit Freunden plant ihr eine Reise nach Puerto Varas und Chiloé. Ihr habt unterschiedliche Vorstellungen." },
+  // B2
+  { id: "entrevista", minLevel: "B2", goal: "beruf", emoji: "🤝", title: "Vorstellungsgespräch", setup: "Vorstellungsgespräch bei einer chilenischen Firma: Fragen zu Erfahrung, Stärken und Motivation." },
+  { id: "tramite", minLevel: "B2", goal: "auswandern", emoji: "📄", title: "Behördengang", setup: "Im Registro Civil willst du deinen Carnet de Identidad für Ausländer beantragen – aber ein Dokument fehlt." },
+  { id: "reunion", minLevel: "B2", goal: "beruf", emoji: "📊", title: "Idee im Meeting vorschlagen", setup: "Im Team-Meeting schlägst du eine Verbesserung vor und reagierst auf Einwände." },
+  // C1
+  { id: "sueldo", minLevel: "C1", goal: "beruf", emoji: "💰", title: "Gehalt verhandeln", setup: "Du verhandelst mit der Personalleiterin über Gehalt, Homeoffice und Vertragsbedingungen." },
+  { id: "sobremesa", minLevel: "C1", goal: "beziehung", emoji: "🍷", title: "Diskussion beim Essen", setup: "Nach dem Essen (sobremesa) diskutierst du mit dem Vater deiner Partnerin über das Leben in Chile und in Deutschland." },
 ];
 
 export function scenariosForLevel(level: Level): Scenario[] {
@@ -33,11 +50,11 @@ export function scenariosForLevel(level: Level): Scenario[] {
   return SCENARIOS.filter((s) => LEVELS.indexOf(s.minLevel) <= max);
 }
 
-/** Deterministic pick of the "scenario of the day", preferring ones at the user's own level. */
+/** Deterministic pick of the "scenario of the day", preferring ones near the user's own level. */
 export function dailyScenario(level: Level, dateKey: string): Scenario {
   const pool = scenariosForLevel(level);
-  const atLevel = pool.filter((s) => LEVELS.indexOf(s.minLevel) >= LEVELS.indexOf(level) - 1);
-  const list = atLevel.length ? atLevel : pool;
+  const near = pool.filter((s) => LEVELS.indexOf(s.minLevel) >= LEVELS.indexOf(level) - 1);
+  const list = near.length ? near : pool;
   let hash = 0;
   for (const ch of dateKey) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
   return list[hash % list.length];

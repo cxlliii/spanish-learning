@@ -1,36 +1,35 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ViewProps } from "../App";
-import { testKey } from "../lib/claude";
-import { DEFAULT_MODEL, initialState } from "../lib/progress";
+import { exportState, importState, initialState } from "../lib/progress";
+import { canListen, canSpeak, speak } from "../lib/speech";
 
-const MODELS = [
-  { id: "claude-opus-5-5", label: "Claude Opus 5.5 (beste Qualität, empfohlen)" },
-  { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5 (schneller, günstiger)" },
-  { id: "claude-haiku-5-5", label: "Claude Haiku 5.5 (am schnellsten, am günstigsten)" },
-];
+export default function Settings({ state, update, go, today }: ViewProps) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
-export default function Settings({ state, update, go }: ViewProps) {
-  const [key, setKey] = useState(state.apiKey);
-  const [model, setModel] = useState(state.model || DEFAULT_MODEL);
-  const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
-  const [busy, setBusy] = useState(false);
+  function download() {
+    const blob = new Blob([exportState(state)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `hablemos-sicherung-${today}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
-  async function save() {
-    setBusy(true);
-    setStatus(null);
+  async function restore(file: File) {
     try {
-      await testKey({ apiKey: key.trim(), model });
-      update((s) => ({ ...s, apiKey: key.trim(), model }));
-      setStatus({ ok: true, text: "Gespeichert – die Verbindung funktioniert. ✅" });
+      const restored = importState(await file.text());
+      if (!confirm("Aktuellen Fortschritt durch die Sicherung ersetzen?")) return;
+      update(() => restored);
+      setMessage({ ok: true, text: "Sicherung wiederhergestellt. ✅" });
     } catch (e) {
-      setStatus({ ok: false, text: (e as Error).message });
-    } finally {
-      setBusy(false);
+      setMessage({ ok: false, text: (e as Error).message });
     }
   }
 
   function reset() {
-    if (!confirm("Wirklich alle Fortschritte, Vokabeln und Einstellungen löschen?")) return;
+    if (!confirm("Wirklich alle Fortschritte und Vokabeln löschen?")) return;
     update(() => initialState());
     go("placement");
   }
@@ -40,39 +39,69 @@ export default function Settings({ state, update, go }: ViewProps) {
       <h1>Einstellungen</h1>
 
       <div className="card">
-        <h2>KI-Gesprächspartner (Claude)</h2>
-        <p className="muted">
-          Für Gespräche, Grammatik-Lektionen und die genaue Einstufung brauchst du einen API-Schlüssel von{" "}
-          <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer">
-            console.anthropic.com
-          </a>
-          . Der Schlüssel wird nur lokal in diesem Browser gespeichert und direkt an die Claude API gesendet.
-        </p>
+        <h2>Lernpensum</h2>
         <label className="field">
-          API-Schlüssel
-          <input type="password" value={key} placeholder="sk-ant-…" onChange={(e) => setKey(e.target.value)} autoComplete="off" />
+          Neue Vokabeln pro Tag: {state.newPerDay}
+          <input
+            type="range"
+            min={0}
+            max={15}
+            value={state.newPerDay}
+            onChange={(e) => update((s) => ({ ...s, newPerDay: Number(e.target.value) }))}
+          />
         </label>
-        <label className="field">
-          Modell
-          <select value={model} onChange={(e) => setModel(e.target.value)}>
-            {MODELS.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="primary" disabled={!key.trim() || busy} onClick={save}>
-          {busy ? "Prüfe…" : "Speichern & testen"}
-        </button>
-        {status && <p className={status.ok ? "ok" : "error"}>{status.text}</p>}
+        <p className="muted">Wörter aus deinen Gesprächen kommen zusätzlich dazu.</p>
       </div>
 
       <div className="card">
-        <h2>Daten</h2>
-        <p className="muted">Alle Daten liegen nur in deinem Browser (localStorage).</p>
+        <h2>Sprache & Audio</h2>
+        <p className="muted">
+          Vorlesen: {canSpeak() ? "verfügbar" : "in diesem Browser nicht verfügbar"} · Spracheingabe 🎤:{" "}
+          {canListen() ? "verfügbar" : "nicht verfügbar (am besten Chrome oder Safari benutzen)"}
+        </p>
+        {canSpeak() && <button onClick={() => speak("¡Hola! ¿Cómo estás? Bienvenido a Chile.")}>🔊 Stimme testen</button>}
+        <p className="muted">
+          Die App nutzt – wenn auf deinem Gerät vorhanden – eine chilenische Stimme, sonst eine andere lateinamerikanische. Weitere Stimmen kannst
+          du in den Sprach-Einstellungen deines Handys installieren.
+        </p>
+      </div>
+
+      <div className="card">
+        <h2>Auf dem Handy installieren</h2>
+        <p className="muted">
+          iPhone (Safari): Teilen-Symbol → „Zum Home-Bildschirm“. Android (Chrome): Menü ⋮ → „App installieren“. Danach funktioniert die App auch
+          offline.
+        </p>
+      </div>
+
+      <div className="card">
+        <h2>Daten sichern</h2>
+        <p className="muted">
+          Dein Fortschritt liegt nur auf diesem Gerät. Mit einer Sicherung kannst du ihn auf ein anderes Gerät übertragen oder nach dem Löschen
+          der Browserdaten wiederherstellen.
+        </p>
+        <div className="row wrap">
+          <button onClick={download}>⬇️ Sicherung herunterladen</button>
+          <button onClick={() => fileRef.current?.click()}>⬆️ Sicherung laden</button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) restore(f);
+              e.target.value = "";
+            }}
+          />
+        </div>
+        {message && <p className={message.ok ? "ok" : "error"}>{message.text}</p>}
+      </div>
+
+      <div className="card">
+        <h2>Zurücksetzen</h2>
         <button className="danger" onClick={reset}>
-          Alles zurücksetzen
+          Alles löschen und neu starten
         </button>
       </div>
     </section>

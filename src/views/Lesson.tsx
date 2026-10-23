@@ -1,58 +1,61 @@
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import type { ViewProps } from "../App";
 import { topicById, topicsForLevel, type GrammarTopic } from "../data/curriculum";
-import { askJSON } from "../lib/claude";
-import { markDay, nextGrammarTopic, recordTopicResult } from "../lib/progress";
-import { canSpeak, normalize, speak } from "../lib/speech";
-import { Grading, gradingPrompt, Lesson as LessonSchema, lessonPrompt, TUTOR_SYSTEM, type Exercise, type LessonT } from "../lib/tutor";
-import NeedsKey from "./NeedsKey";
+import { lessonFor } from "../data/lessons";
+import { markDay, nextGrammarTopic, recordTopicResult, setMissed, type MissedExercise } from "../lib/progress";
+import { shuffle } from "../lib/placement";
+import { canSpeak, speak } from "../lib/speech";
+import ExerciseRunner, { type ExerciseItem } from "./ExerciseRunner";
 
-interface Result {
-  correct: boolean;
-  feedback?: string;
-}
+export const REVIEW_PARAM = "review";
+const REVIEW_SIZE = 8;
 
 export default function Lesson(props: ViewProps) {
   const { state, param } = props;
-  const [topic, setTopic] = useState<GrammarTopic | null>(() => (param ? topicById(param) ?? null : null));
-  if (!state.apiKey) return <NeedsKey {...props} what="Grammatik-Lektionen" />;
+  const [selection, setSelection] = useState<string | null>(param ?? null);
   if (!state.level) return null;
 
-  if (!topic) {
-    const suggested = nextGrammarTopic(state);
-    return (
-      <section>
-        <h1>Grammatik</h1>
-        {suggested && (
-          <button className="card suggestion" onClick={() => setTopic(suggested)}>
-            <small>Empfohlen für heute</small>
-            <strong>{suggested.title}</strong>
-            <span className="muted">{suggested.summary}</span>
-          </button>
-        )}
-        <h2>Alle Themen auf {state.level}</h2>
-        <div className="topic-list">
-          {topicsForLevel(state.level).map((t) => (
-            <TopicRow key={t.id} topic={t} mastery={state.topics[t.id]?.mastery} onClick={() => setTopic(t)} />
-          ))}
-        </div>
-        {state.placement?.weakTopics.some((id) => topicById(id)?.level !== state.level) && (
-          <>
-            <h2>Wiederholung</h2>
-            <div className="topic-list">
-              {state.placement.weakTopics
-                .map(topicById)
-                .filter((t): t is GrammarTopic => !!t && t.level !== state.level)
-                .map((t) => (
-                  <TopicRow key={t.id} topic={t} mastery={state.topics[t.id]?.mastery} onClick={() => setTopic(t)} />
-                ))}
-            </div>
-          </>
-        )}
-      </section>
-    );
-  }
-  return <LessonSession {...props} topic={topic} onBack={() => setTopic(null)} />;
+  if (selection === REVIEW_PARAM && state.missed.length) return <ReviewSession {...props} onBack={() => setSelection(null)} />;
+  const topic = selection ? topicById(selection) : undefined;
+  if (topic) return <LessonSession {...props} topic={topic} onBack={() => setSelection(null)} />;
+
+  const suggested = nextGrammarTopic(state);
+  const weakOther = (state.placement?.weakTopics ?? []).map(topicById).filter((t): t is GrammarTopic => !!t && t.level !== state.level);
+
+  return (
+    <section>
+      <h1>Grammatik</h1>
+      {suggested && (
+        <button className="card suggestion" onClick={() => setSelection(suggested.id)}>
+          <small>Empfohlen für heute</small>
+          <strong>{suggested.title}</strong>
+          <span className="muted">{suggested.summary}</span>
+        </button>
+      )}
+      {state.missed.length > 0 && (
+        <button className="card suggestion review" onClick={() => setSelection(REVIEW_PARAM)}>
+          <small>Fehler wiederholen</small>
+          <strong>{state.missed.length} Übungen, die noch nicht saßen</strong>
+        </button>
+      )}
+      <h2>Alle Themen auf {state.level}</h2>
+      <div className="topic-list">
+        {topicsForLevel(state.level).map((t) => (
+          <TopicRow key={t.id} topic={t} mastery={state.topics[t.id]?.mastery} onClick={() => setSelection(t.id)} />
+        ))}
+      </div>
+      {weakOther.length > 0 && (
+        <>
+          <h2>Wiederholung (aus dem Einstufungstest)</h2>
+          <div className="topic-list">
+            {weakOther.map((t) => (
+              <TopicRow key={t.id} topic={t} mastery={state.topics[t.id]?.mastery} onClick={() => setSelection(t.id)} />
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
 }
 
 function TopicRow({ topic, mastery, onClick }: { topic: GrammarTopic; mastery?: number; onClick: () => void }) {
@@ -71,69 +74,11 @@ function TopicRow({ topic, mastery, onClick }: { topic: GrammarTopic; mastery?: 
   );
 }
 
-function isLocallyCorrect(ex: Exercise, given: string): boolean {
-  const g = normalize(given);
-  return [ex.answer, ...ex.alternatives].some((a) => normalize(a) === g);
-}
-
 function LessonSession({ state, update, go, today, topic, onBack }: ViewProps & { topic: GrammarTopic; onBack: () => void }) {
-  const cfg = { apiKey: state.apiKey, model: state.model };
-  const [lesson, setLesson] = useState<LessonT | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<string[]>([]);
-  const [results, setResults] = useState<Result[] | null>(null);
-  const [checking, setChecking] = useState(false);
-  const loaded = useRef(false);
-
-  async function load() {
-    setError(null);
-    try {
-      const l = await askJSON(cfg, {
-        system: TUTOR_SYSTEM,
-        prompt: lessonPrompt(topic, state.level!, state.topics[topic.id]?.mastery ?? 0, state.recentMistakes),
-        schema: LessonSchema,
-        effort: "medium",
-      });
-      setLesson(l);
-      setAnswers(l.exercises.map(() => ""));
-    } catch (e) {
-      setError((e as Error).message);
-    }
-  }
-
-  useEffect(() => {
-    if (loaded.current) return;
-    loaded.current = true;
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function check() {
-    if (!lesson) return;
-    setChecking(true);
-    setError(null);
-    const local: Result[] = lesson.exercises.map((ex, i) => ({ correct: isLocallyCorrect(ex, answers[i]) }));
-    // Free-text answers that don't match the key exactly are graded by the AI (other wordings can be right too).
-    const toGrade = lesson.exercises
-      .map((exercise, index) => ({ index, exercise, given: answers[index] }))
-      .filter((i) => !local[i.index].correct && i.exercise.type !== "choice" && i.given.trim());
-    let final = local;
-    if (toGrade.length) {
-      try {
-        const graded = await askJSON(cfg, { system: TUTOR_SYSTEM, prompt: gradingPrompt(toGrade), schema: Grading, effort: "low" });
-        final = local.map((r, i) => {
-          const g = graded.results.find((x) => x.index === i);
-          return g ? { correct: g.correct, feedback: g.feedback_de } : r;
-        });
-      } catch (e) {
-        setError(`KI-Prüfung nicht möglich, es wird nur mit der Musterlösung verglichen. (${(e as Error).message})`);
-      }
-    }
-    setResults(final);
-    setChecking(false);
-    const ratio = final.filter((r) => r.correct).length / final.length;
-    update((s) => markDay(recordTopicResult(s, topic.id, ratio, today), today, "grammar"));
-  }
+  const lesson = lessonFor(topic.id);
+  const [phase, setPhase] = useState<"learn" | "practice" | "done">(state.topics[topic.id] ? "practice" : "learn");
+  const [score, setScore] = useState<{ right: number; total: number } | null>(null);
+  const items = useMemo<ExerciseItem[]>(() => (lesson ? lesson.exercises.map((exercise, i) => ({ key: `${topic.id}-${i}`, exercise })) : []), [lesson, topic.id]);
 
   if (!lesson) {
     return (
@@ -142,21 +87,18 @@ function LessonSession({ state, update, go, today, topic, onBack }: ViewProps & 
           ← Themen
         </button>
         <h1>{topic.title}</h1>
-        {error ? (
-          <p className="error">
-            {error}{" "}
-            <button className="link" onClick={load}>
-              Erneut versuchen
-            </button>
-          </p>
-        ) : (
-          <div className="loading">Dein Lehrer bereitet die Lektion vor…</div>
-        )}
+        <p className="muted">Zu diesem Thema gibt es noch keine Lektion.</p>
       </section>
     );
   }
 
-  const score = results ? results.filter((r) => r.correct).length : 0;
+  function finish(results: boolean[]) {
+    const right = results.filter(Boolean).length;
+    const wrong = results.flatMap((ok, i) => (ok ? [] : [i]));
+    update((s) => markDay(setMissed(recordTopicResult(s, topic.id, right / results.length, today), topic.id, wrong), today, "grammar"));
+    setScore({ right, total: results.length });
+    setPhase("done");
+  }
 
   return (
     <section>
@@ -164,95 +106,110 @@ function LessonSession({ state, update, go, today, topic, onBack }: ViewProps & 
         ← Themen
       </button>
       <h1>{topic.title}</h1>
-      <div className="card explanation">
-        {lesson.explanation_de.split(/\n\n+/).map((p, i) => (
-          <p key={i}>{p}</p>
-        ))}
-      </div>
-      <div className="card">
-        <h3>Beispiele</h3>
-        <ul className="examples">
-          {lesson.examples.map((ex, i) => (
-            <li key={i}>
-              <span>
-                <strong>{ex.es}</strong>
-                <br />
-                <span className="muted">{ex.de}</span>
-              </span>
-              {canSpeak() && (
-                <button className="speak" onClick={() => speak(ex.es)}>
-                  🔊
-                </button>
-              )}
-            </li>
+
+      {phase !== "practice" && (
+        <details className="card explanation" open={phase === "learn"}>
+          <summary>Erklärung</summary>
+          {lesson.explanation.map((p, i) => (
+            <p key={i} className={p.startsWith("•") ? "rule" : ""}>
+              {p}
+            </p>
           ))}
-        </ul>
-      </div>
-
-      <h2>Übungen</h2>
-      {lesson.exercises.map((ex, i) => {
-        const r = results?.[i];
-        return (
-          <div key={i} className={`card exercise ${r ? (r.correct ? "right" : "wrong") : ""}`}>
-            <small className="muted">
-              {i + 1}. {ex.instruction_de}
-            </small>
-            <p className="question">{ex.question}</p>
-            {ex.type === "choice" && ex.options.length > 0 ? (
-              <div className="options inline">
-                {ex.options.map((o) => (
-                  <button
-                    key={o}
-                    className={`option ${answers[i] === o ? "selected" : ""}`}
-                    disabled={!!results}
-                    onClick={() => setAnswers((a) => a.map((v, j) => (j === i ? o : v)))}
-                  >
-                    {o}
+          <h3>Beispiele</h3>
+          <ul className="examples">
+            {lesson.examples.map((ex, i) => (
+              <li key={i}>
+                <span>
+                  <strong>{ex.es}</strong>
+                  <br />
+                  <span className="muted">{ex.de}</span>
+                </span>
+                {canSpeak() && (
+                  <button className="speak" onClick={() => speak(ex.es)}>
+                    🔊
                   </button>
-                ))}
-              </div>
-            ) : (
-              <input
-                value={answers[i]}
-                disabled={!!results}
-                placeholder={ex.type === "translate" ? "Übersetzung auf Spanisch" : "Antwort"}
-                onChange={(e) => setAnswers((a) => a.map((v, j) => (j === i ? e.target.value : v)))}
-              />
-            )}
-            {!results && (
-              <details>
-                <summary>Tipp</summary>
-                {ex.hint_de}
-              </details>
-            )}
-            {r && (
-              <div className="result">
-                {r.correct ? "✅ Richtig" : "❌"} {!r.correct && <>Lösung: <strong>{ex.answer}</strong></>}
-                {r.feedback && <div className="muted">{r.feedback}</div>}
-              </div>
-            )}
-          </div>
-        );
-      })}
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
-      {error && <p className="error">{error}</p>}
-      {!results ? (
-        <button className="primary big" disabled={checking || answers.every((a) => !a.trim())} onClick={check}>
-          {checking ? "Wird geprüft…" : "Antworten prüfen"}
+      {phase === "learn" && (
+        <button className="primary big" onClick={() => setPhase("practice")}>
+          Zu den Übungen ({items.length})
         </button>
-      ) : (
+      )}
+
+      {phase === "practice" && (
+        <>
+          {state.topics[topic.id] && (
+            <button className="link small" onClick={() => setPhase("learn")}>
+              Erklärung nochmal ansehen
+            </button>
+          )}
+          <ExerciseRunner items={items} onDone={finish} />
+        </>
+      )}
+
+      {phase === "done" && score && (
         <div className="card center">
           <div className="level-big">
-            {score}/{results.length}
+            {score.right}/{score.total}
           </div>
-          <p>{score / results.length >= 0.8 ? "¡Muy bien! Thema sitzt. 🎉" : "Weiter üben – das Thema kommt wieder dran."}</p>
-          <div className="row">
+          <p>{score.right / score.total >= 0.8 ? "¡Bacán! Das Thema sitzt. 🎉" : "Weiter so – falsche Übungen kommen in deiner Fehler-Wiederholung wieder."}</p>
+          <div className="row center-row">
             <button className="primary" onClick={() => go("home")}>
               Fertig
             </button>
             <button onClick={onBack}>Anderes Thema</button>
           </div>
         </div>
+      )}
+    </section>
+  );
+}
+
+function ReviewSession({ state, update, go, today, onBack }: ViewProps & { onBack: () => void }) {
+  const [batch] = useState<MissedExercise[]>(() =>
+    shuffle(state.missed.filter((m) => lessonFor(m.topicId)?.exercises[m.index])).slice(0, REVIEW_SIZE),
+  );
+  const [score, setScore] = useState<{ right: number; total: number } | null>(null);
+  const items = useMemo<ExerciseItem[]>(
+    () =>
+      batch.map((m) => ({ key: `${m.topicId}-${m.index}`, exercise: lessonFor(m.topicId)!.exercises[m.index], label: topicById(m.topicId)?.title })),
+    [batch],
+  );
+
+  function finish(results: boolean[]) {
+    const solved = new Set(batch.filter((_, i) => results[i]).map((m) => `${m.topicId}-${m.index}`));
+    update((s) => markDay({ ...s, missed: s.missed.filter((m) => !solved.has(`${m.topicId}-${m.index}`)) }, today, "grammar"));
+    setScore({ right: solved.size, total: results.length });
+  }
+
+  return (
+    <section>
+      <button className="link" onClick={onBack}>
+        ← Themen
+      </button>
+      <h1>Fehler wiederholen</h1>
+      {score ? (
+        <div className="card center">
+          <div className="level-big">
+            {score.right}/{score.total}
+          </div>
+          <p>Richtig gelöste Übungen sind jetzt aus der Wiederholung entfernt.</p>
+          <div className="row center-row">
+            <button className="primary" onClick={() => go("home")}>
+              Fertig
+            </button>
+            <button onClick={onBack}>Zurück</button>
+          </div>
+        </div>
+      ) : items.length ? (
+        <ExerciseRunner items={items} onDone={finish} />
+      ) : (
+        <p className="muted">Nichts zu wiederholen.</p>
       )}
     </section>
   );

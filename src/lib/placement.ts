@@ -93,15 +93,7 @@ export function scorePlacement(answers: PlacementAnswer[]): PlacementResult {
   return { level, scores, weakTopics };
 }
 
-/** Combine the multiple-choice result with the AI's assessment of free production (max. one level apart). */
-export function combineLevels(mcLevel: Level, aiLevel: Level | null): Level {
-  if (!aiLevel) return mcLevel;
-  const mc = LEVELS.indexOf(mcLevel);
-  const ai = LEVELS.indexOf(aiLevel);
-  return LEVELS[Math.max(mc - 1, Math.min(mc + 1, ai))];
-}
-
-function shuffle<T>(items: T[], random: () => number): T[] {
+export function shuffle<T>(items: T[], random: () => number = Math.random): T[] {
   const a = [...items];
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));

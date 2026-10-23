@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { PLACEMENT_QUESTIONS } from "../data/placement";
-import { combineLevels, PlacementTest } from "./placement";
-import { applyLevel, initialState, levelUpReady, nextGrammarTopic, recordTopicResult, streak } from "./progress";
+import { PlacementTest } from "./placement";
+import { VOCAB } from "../data/vocabList";
+import { applyLevel, initialState, introduceNewWords, levelUpReady, nextGrammarTopic, recordTopicResult, streak } from "./progress";
 import { addDays, newCard, review } from "./srs";
-import { splitCorrection } from "./tutor";
 
 function run(correctUntil: string) {
   const t = new PlacementTest(() => 0.5);
@@ -40,13 +40,6 @@ describe("placement", () => {
   it("collects weak topics from wrong answers", () => {
     expect(run("A1").result().weakTopics.length).toBeGreaterThan(0);
   });
-
-  it("limits AI assessment to one level away", () => {
-    expect(combineLevels("A2", "C1")).toBe("B1");
-    expect(combineLevels("B2", "A1")).toBe("B1");
-    expect(combineLevels("B1", "B2")).toBe("B2");
-    expect(combineLevels("B1", null)).toBe("B1");
-  });
 });
 
 describe("srs", () => {
@@ -72,15 +65,18 @@ describe("srs", () => {
 
 describe("progress", () => {
   const today = "2026-10-23";
-  it("seeds vocabulary up to the level", () => {
-    const s = applyLevel(initialState(), "A2", today);
-    expect(s.cards.length).toBeGreaterThan(10);
-    expect(s.cards.every((c) => c.due === today)).toBe(true);
+  it("introduces a limited number of new words per day, easiest first", () => {
+    let s = applyLevel(initialState(), "B1", today);
+    s = introduceNewWords(s, today);
+    expect(s.cards.length).toBe(5);
+    expect(introduceNewWords(s, today)).toBe(s); // idempotent within a day
+    expect(VOCAB.find((w) => w.es === s.cards[0].es)?.level).toBe("A1");
+    expect(introduceNewWords(s, addDays(today, 1)).cards.length).toBe(10);
   });
 
   it("prefers weak placement topics, then curriculum order", () => {
     let s = applyLevel(initialState(), "A2", today);
-    s = { ...s, placement: { date: today, mcLevel: "A2", finalLevel: "A2", weakTopics: ["comparativos"] } };
+    s = { ...s, placement: { date: today, level: "A2", weakTopics: ["comparativos"] } };
     expect(nextGrammarTopic(s)?.id).toBe("comparativos");
     s = recordTopicResult(s, "comparativos", 1, today);
     expect(nextGrammarTopic(s)?.id).toBe("indefinido-regular");
@@ -100,19 +96,5 @@ describe("progress", () => {
     expect(levelUpReady(s)).toBe(false);
     s = { ...s, conversations: [8, 7, 8].map((score) => ({ date: today, scenarioId: "cafe", score, summary: "", mistakes: [] })) };
     expect(levelUpReady(s)).toBe(true);
-  });
-});
-
-describe("splitCorrection", () => {
-  it("separates the correction block", () => {
-    const r = splitCorrection("¡Muy bien! ¿Y tú?\n[[KORREKTUR]]\n❌ yo es → ✅ yo soy\n[[/KORREKTUR]]");
-    expect(r.reply).toBe("¡Muy bien! ¿Y tú?");
-    expect(r.correction).toBe("❌ yo es → ✅ yo soy");
-  });
-  it("handles a block still streaming", () => {
-    expect(splitCorrection("Hola [[KORREKTUR]] ❌").reply).toBe("Hola");
-  });
-  it("returns no correction when absent", () => {
-    expect(splitCorrection("Hola").correction).toBeNull();
   });
 });
